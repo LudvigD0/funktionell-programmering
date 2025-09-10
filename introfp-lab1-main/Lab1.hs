@@ -35,7 +35,7 @@ power n k = n * power n (k-1)
 -- 3 * 3 * power 3 (1 - 1)
 -- => { apply subtraction }
 -- 3 * (3 * power 3 0)
--- => { third case }
+-- => { second case }
 -- 3 * (3 * 1)
 -- => { apply multiplication }
 -- 3 * 3
@@ -44,17 +44,24 @@ power n k = n * power n (k-1)
 
 -- Part B ----------------------------------------------------------------------
 
---power1 n k = product[n | x <- [1..k]]
-power1 n k = product( replicate k n )
+power1 :: Int -> Int -> Int
+power1 n k
+  | k < 0 = error "power: negative argument"
+  | otherwise = product( replicate k n )
 
 
 -- Part C ----------------------------------------------------------------------
 
+
+
+power2 :: Int -> Int -> Int
+power2 n 0 = 1
 power2 n k
-  | k < 0 = error "power: negative argument"
-  | k == 0 = 1
-  | even k = (n * n)^(k `div` 2)
-  | odd k = n*(n^(k-1))
+ | k < 0 = error "power: negative argument"
+ | even k = power2 (n*n) (k `div` 2)
+ | odd k = n * power2 n (k-1)
+
+
 
 
 -- Part D ----------------------------------------------------------------------
@@ -63,7 +70,7 @@ power2 n k
 
 test1 = power1 2 3 == power 2 3 
 test2 = power2 2 3 == power 2 3 --compare power2 with power to ensure the result is the same
-test3 = power2 2 3 /= power 3 2 --counter evidence for test 2
+test3 = power2 10 10 == power 10 10 --Test that big values work
 test4 = power2 (-1) 2 == power 1 2  -- testing negative value with positive
 test5 = power1 5 0 == power2 8 0 --The zero makes both of the functions return 1 and 1 == 1 is ofcourse true
 
@@ -71,8 +78,9 @@ test5 = power1 5 0 == power2 8 0 --The zero makes both of the functions return 1
 comparePower1 :: Int -> Int -> Bool
 comparePower1 n k = power n k == power1 n k
 
-comparePower2 :: Int -> Int -> Bool
+comparePower2 :: Int -> Int -> Bool 
 comparePower2 n k = power n k == power2 n k
+
 
 -- Part D.3
 
