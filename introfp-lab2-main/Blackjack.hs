@@ -17,15 +17,23 @@ import Cards
 import RunGame
 import Test.QuickCheck hiding (shuffle)
 
---skapar två testkort
+--Create different testcards
 aCard1 :: Card
 aCard1 = Card (Numeric 8) Hearts
 
 aCard2 :: Card
 aCard2 = Card Ace Spades
+
+aCard3 :: Card
+aCard3 = Card King Hearts
+
+
 --Create a test hand
 aHand :: Hand
 aHand = aCard1:(aCard2:[])
+
+a21 :: Hand
+a21 = aCard2:(aCard3: [])
 
 -- Task A1 --
 
@@ -33,36 +41,68 @@ hand2 :: Hand
 hand2 = [Card (Numeric 2) Hearts, Card Jack Spades]
 
 sizeSteps :: [Int]
-sizeSteps = [
-  size hand2,
-  size (Card (Numeric 2) Hearts : (Card Jack Spades : [])),
-  1 + size (Card Jack Spades : []),
-  1 + (1 + size [])
-  1 + (1 + 0)
-  1 + 1
-  2
-]
+sizeSteps = 
+  [ size hand2
+  , size (Card (Numeric 2) Hearts : (Card Jack Spades : []))
+  , 1 + size (Card Jack Spades : [])
+  , 1 + (1 + size [])
+  , 1 + (1 + 0)
+  , 1 + 1
+  , 2 
+  ]
 
 -- Task A2 --
 
-display :: Hand -> String
-display = undefined
+suitUnicode :: Suit -> String
+suitUnicode Spades =  "\x2660"
+suitUnicode Hearts =  "\x2665"
+suitUnicode Clubs =  "\x2663"
+suitUnicode Diamonds =  "\x2666"
+
+rankString :: Rank -> String
+rankString (Numeric n) = show(n) 
+rankString rank = show rank
 
 displayCard :: Card -> String
-displayCard 
+displayCard card =  rankString((rank card)) ++ " of " ++ (suitUnicode (suit card))
+
+display :: Hand -> String
+display hand = unlines [displayCard card | card <- hand]
 
 -- Task A3 --
 
+valueRank :: Rank -> Int
+valueRank Ace = 11
+valueRank Queen = 10
+valueRank King = 10
+valueRank Jack = 10
+valueRank (Numeric n) = n
+
+valueCard :: Card -> Int
+valueCard card = valueRank (rank card)
+
+numberOfAces :: Hand -> Int
+numberOfAces hand = length [card | card <- hand, rank card == Ace]
+
 value :: Hand -> Int
-value = undefined
+value hand
+    | total <= 21 = total
+    | otherwise = total - (numberOfAces hand * 10) 
+    where 
+      total = sum [valueCard card | card <- hand]
 
 -- Task A4 --
---
+
 gameOver :: Hand -> Bool
-gameOver = undefined
+gameOver hand = value hand > 21
 
 winner :: Hand -> Hand -> Player
-winner = undefined
+winner guestHand bankHand 
+  | gameOver guestHand = Bank
+  | value guestHand <= 21 && gameOver bankHand = Guest
+  | value guestHand == value bankHand = Bank
+  | value guestHand < value bankHand = Bank
+  | value guestHand > value bankHand = Guest
 
 --------------------------------------------------------------------------------
 -- Part B
