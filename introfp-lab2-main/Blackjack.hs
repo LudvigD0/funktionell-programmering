@@ -64,7 +64,7 @@ rankString (Numeric n) = show(n)
 rankString rank = show rank
 
 displayCard :: Card -> String
-displayCard card =  rankString((rank card)) ++ " of " ++ (suitUnicode (suit card))
+displayCard card =  rankString((rank card)) ++ ", " ++ (suitUnicode (suit card))
 
 display :: Hand -> String
 display hand = unlines [displayCard card | card <- hand]
@@ -99,7 +99,7 @@ gameOver hand = value hand > 21
 winner :: Hand -> Hand -> Player
 winner guestHand bankHand 
   | gameOver guestHand = Bank
-  | value guestHand <= 21 && gameOver bankHand = Guest
+  | gameOver bankHand = Guest
   | value guestHand == value bankHand = Bank
   | value guestHand < value bankHand = Bank
   | value guestHand > value bankHand = Guest
@@ -109,8 +109,24 @@ winner guestHand bankHand
 ---------------------------------------------------------------------------------
 
 -- Task B1 --
+--behöver retunera en lista med alla kort,
+--varje kort består av en Rank och en Suit "Card Jack Black"
+--Det finns 4 Suits,
+--Det finns 2,3,4,5,6,7,8,9,10, Jack, Queen, King, Ace - 13 ranks
+--Göra en lista med alla ranker?
+--
+
+numericRanks :: [String]
+numericRanks = [show x | x <- [2..10]]
+otherRanks = [Jack, Queen, King, Ace]
+
+suits = [Spades, Diamonds, Clubs, Hearts]
+
+--allRanks = numericRanks ++ [Jack, Queen, King, Ace]
+
+
 fullDeck :: Deck
-fullDeck = undefined
+fullDeck = undefined {- [card | card rank suit <- [1..]] -}
 
 prop_size_fullDeck :: Bool
 prop_size_fullDeck = size fullDeck == 52
