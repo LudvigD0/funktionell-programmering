@@ -109,24 +109,15 @@ winner guestHand bankHand
 ---------------------------------------------------------------------------------
 
 -- Task B1 --
---behöver retunera en lista med alla kort,
---varje kort består av en Rank och en Suit "Card Jack Black"
---Det finns 4 Suits,
---Det finns 2,3,4,5,6,7,8,9,10, Jack, Queen, King, Ace - 13 ranks
---Göra en lista med alla ranker?
---
 
-numericRanks :: [String]
-numericRanks = [show x | x <- [2..10]]
-otherRanks = [Jack, Queen, King, Ace]
+allRanks :: [Rank]
+allRanks = [Numeric x | x <- [2..10]] ++ [Jack, Queen, King, Ace]
 
-suits = [Spades, Diamonds, Clubs, Hearts]
-
---allRanks = numericRanks ++ [Jack, Queen, King, Ace]
-
+allSuits :: [Suit]
+allSuits = [Spades, Diamonds, Clubs, Hearts]
 
 fullDeck :: Deck
-fullDeck = undefined {- [card | card rank suit <- [1..]] -}
+fullDeck = [Card x y | x <- allRanks, y <- allSuits]
 
 prop_size_fullDeck :: Bool
 prop_size_fullDeck = size fullDeck == 52
@@ -134,17 +125,25 @@ prop_size_fullDeck = size fullDeck == 52
 -- Task B2 --
 
 draw :: Deck -> Hand -> (Deck, Hand)
-draw = undefined
+draw [] _ = error "draw: The deck is empty"
+draw (x:xs) hand = (xs,x : hand)
+
 
 -- Task B3 --
 
+
 playBank :: Deck -> Hand
-playBank = undefined
+playBank deck = playBank' deck []
+
+playBank' deck bankHand
+  | value bankHand >= 16 = bankHand
+  | otherwise = playBank' deck' bankHand'
+    where (deck', bankHand') = draw deck bankHand
 
 -- Task B4 --
 
 pick :: Double -> Deck -> Card
-pick = undefined
+pick double deck = undefined
 
 shuffle :: [Double] -> Deck -> Deck
 shuffle = undefined

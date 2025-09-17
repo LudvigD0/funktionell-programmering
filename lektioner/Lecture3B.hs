@@ -78,4 +78,4 @@ instance Show Suit where
 
  -}
 
---test = elements Test      säljer slumpmässigt värde från listan.
+--test = elements Test      väljer slumpmässigt värde från listan.

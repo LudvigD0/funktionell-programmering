@@ -70,7 +70,7 @@ power2 n k
 
 test1 = power1 2 3 == power 2 3 
 test2 = power2 2 3 == power 2 3 --compare power2 with power to ensure the result is the same
-test3 = power2 10 10 == power 10 10 --Test that big values work
+test3 = power2 10 10 == power 10 10 --Test that bigger values work
 test4 = power2 (-1) 2 == power 1 2  -- testing negative value with positive
 test5 = power1 5 0 == power2 8 0 --The zero makes both of the functions return 1 and 1 == 1 is ofcourse true
 
