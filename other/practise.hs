@@ -1,7 +1,9 @@
-import Data.Text.Internal.Fusion.Size (larger)
-qsort [] = []
 
-qsort (x:xs) = qsort smaller ++ [] ++ qsort larger
+
+
+sumEven :: [Int] -> Int
+sumEven list = go list 
     where
-        smaller = [a | a <- xs, a <= x]
-        larger = [b | b <- xs, b > x]
+        go [] = 0
+        go (x, xs) | x + go xs
+

@@ -64,7 +64,7 @@ rankString (Numeric n) = show(n)
 rankString rank = show rank
 
 displayCard :: Card -> String
-displayCard card =  rankString((rank card)) ++ ", " ++ (suitUnicode (suit card))
+displayCard card = rankString((rank card)) ++ ", " ++ (suitUnicode (suit card))
 
 display :: Hand -> String
 display hand = unlines [displayCard card | card <- hand]
@@ -114,7 +114,7 @@ allRanks :: [Rank]
 allRanks = [Numeric x | x <- [2..10]] ++ [Jack, Queen, King, Ace]
 
 allSuits :: [Suit]
-allSuits = [Spades, Diamonds, Clubs, Hearts]
+allSuits = [Hearts, Spades, Diamonds, Clubs]
 
 fullDeck :: Deck
 fullDeck = [Card x y | x <- allRanks, y <- allSuits]
@@ -142,11 +142,41 @@ playBank' deck bankHand
 
 -- Task B4 --
 
+{- pick :: Double -> Deck -> Card
+pick double deck
+  | double > 1 = error "pick: Värdet är för stort"
+  | null deck = error "pick: Listan är tom!"
+  | otherwise = go double deck
+  where
+    go 0 (x:xs) = x
+    go double' (x:xs)
+      | double' /= (1.0 / fromIntegral (length (x:xs)) ) = pick double' xs
+      | double' == (1.0 / fromIntegral (length (x:xs)) ) = x
+    -} 
+
 pick :: Double -> Deck -> Card
-pick double deck = undefined
+pick n deck
+  | null deck = error "Empty deck"
+  | n < 0 = error "Negative n has to be between 0 and 1"
+  | n > 1 = error "Too large"
+  | otherwise = deck !! round (fromIntegral (length deck -1) * n)
+
 
 shuffle :: [Double] -> Deck -> Deck
-shuffle = undefined
+shuffle doubles deck = go doubles deck
+  where
+    go [] _ = []
+    go _ [] = []
+    go (x:xs) d = pick x d : go xs modifiedDeck
+      where
+        i = round (fromIntegral (length d-1) * x)
+        modifiedDeck = take i d ++ drop (i + 1) d
+
+
+--måste göra så att shuffle funktionen faktiskt tar bort värdet, antingen i pick funktionen eller shuffle
+--problemet ligger i att pick kommer att använda decket där vi alltid tar bort det-
+--första värdet men vi tar ju aldrig bort det värdet vi faktiskt tar ur kortleken
+
 
 runShuffle :: IO Deck
 runShuffle = do
@@ -163,10 +193,29 @@ prop_shuffle :: Card -> Deck -> Rand -> Bool
 prop_shuffle card deck (Rand randomlist) = 
   card `belongsTo` deck == card `belongsTo` shuffle randomlist deck
 
+
+--kolla så storleken på mitt deck inte ändras när jag shufflar, alltså att det behåller samma storlek
 prop_size_shuffle :: Rand -> Deck -> Bool
-prop_size_shuffle (Rand randomlist) deck = undefined
+prop_size_shuffle (Rand randomList) deck = length deck == length result
+  where
+    result = shuffle randomList deck
+
+
 
 -- Task B6 --
 
 -- follow the instructions on Canvas
 
+implementation = Interface
+  {  iFullDeck  = fullDeck
+  ,  iValue     = value
+  ,  iDisplay   = display
+  ,  iGameOver  = gameOver
+  ,  iWinner    = winner
+  ,  iDraw      = draw
+  ,  iPlayBank  = playBank
+  ,  iShuffle   = shuffle
+  }
+
+main :: IO ()
+main = runGame implementation
