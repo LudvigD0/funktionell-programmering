@@ -6,8 +6,8 @@ License     : BSD
 Maintainer  : alexg@chalmers.se
 Stability   : experimental
 
-Authors     : <list your names here>
-Lab group   : <group number>
+Authors     : <Ludvig Dahlgren, Elliot Frost, Gabriel Hassan>
+Lab group   : <51>
 -}
 
 module Blackjack where
@@ -131,7 +131,6 @@ draw (x:xs) hand = (xs,x : hand)
 
 -- Task B3 --
 
-
 playBank :: Deck -> Hand
 playBank deck = playBank' deck []
 
@@ -141,18 +140,6 @@ playBank' deck bankHand
     where (deck', bankHand') = draw deck bankHand
 
 -- Task B4 --
-
-{- pick :: Double -> Deck -> Card
-pick double deck
-  | double > 1 = error "pick: Värdet är för stort"
-  | null deck = error "pick: Listan är tom!"
-  | otherwise = go double deck
-  where
-    go 0 (x:xs) = x
-    go double' (x:xs)
-      | double' /= (1.0 / fromIntegral (length (x:xs)) ) = pick double' xs
-      | double' == (1.0 / fromIntegral (length (x:xs)) ) = x
-    -} 
 
 pick :: Double -> Deck -> Card
 pick n deck
@@ -172,12 +159,6 @@ shuffle doubles deck = go doubles deck
         i = round (fromIntegral (length d-1) * x)
         modifiedDeck = take i d ++ drop (i + 1) d
 
-
---måste göra så att shuffle funktionen faktiskt tar bort värdet, antingen i pick funktionen eller shuffle
---problemet ligger i att pick kommer att använda decket där vi alltid tar bort det-
---första värdet men vi tar ju aldrig bort det värdet vi faktiskt tar ur kortleken
-
-
 runShuffle :: IO Deck
 runShuffle = do
   Rand ds <- generate arbitrary
@@ -193,8 +174,6 @@ prop_shuffle :: Card -> Deck -> Rand -> Bool
 prop_shuffle card deck (Rand randomlist) = 
   card `belongsTo` deck == card `belongsTo` shuffle randomlist deck
 
-
---kolla så storleken på mitt deck inte ändras när jag shufflar, alltså att det behåller samma storlek
 prop_size_shuffle :: Rand -> Deck -> Bool
 prop_size_shuffle (Rand randomList) deck = length deck == length result
   where
@@ -203,8 +182,6 @@ prop_size_shuffle (Rand randomList) deck = length deck == length result
 
 
 -- Task B6 --
-
--- follow the instructions on Canvas
 
 implementation = Interface
   {  iFullDeck  = fullDeck
