@@ -6,8 +6,8 @@ License     : BSD
 Maintainer  : alexg@chalmers.se
 Stability   : experimental
 
-Authors     : <list your names here>
-Lab group   : <group number>
+Authors     : <Ludvig Dahlgren, Elliot Frost, Gabriel Hassan>
+Lab group   : <51>
 -}
 
 module Blackjack where
@@ -64,7 +64,7 @@ rankString (Numeric n) = show(n)
 rankString rank = show rank
 
 displayCard :: Card -> String
-displayCard card =  rankString((rank card)) ++ ", " ++ (suitUnicode (suit card))
+displayCard card = rankString((rank card)) ++ ", " ++ (suitUnicode (suit card))
 
 display :: Hand -> String
 display hand = unlines [displayCard card | card <- hand]
@@ -114,7 +114,7 @@ allRanks :: [Rank]
 allRanks = [Numeric x | x <- [2..10]] ++ [Jack, Queen, King, Ace]
 
 allSuits :: [Suit]
-allSuits = [Spades, Diamonds, Clubs, Hearts]
+allSuits = [Hearts, Spades, Diamonds, Clubs]
 
 fullDeck :: Deck
 fullDeck = [Card x y | x <- allRanks, y <- allSuits]
@@ -131,7 +131,6 @@ draw (x:xs) hand = (xs,x : hand)
 
 -- Task B3 --
 
-
 playBank :: Deck -> Hand
 playBank deck = playBank' deck []
 
@@ -143,10 +142,22 @@ playBank' deck bankHand
 -- Task B4 --
 
 pick :: Double -> Deck -> Card
-pick double deck = undefined
+pick n deck
+  | null deck = error "Empty deck"
+  | n < 0 = error "Negative n has to be between 0 and 1"
+  | n > 1 = error "Too large"
+  | otherwise = deck !! round (fromIntegral (length deck -1) * n)
+
 
 shuffle :: [Double] -> Deck -> Deck
-shuffle = undefined
+shuffle doubles deck = go doubles deck
+  where
+    go [] _ = []
+    go _ [] = []
+    go (x:xs) d = pick x d : go xs modifiedDeck
+      where
+        i = round (fromIntegral (length d-1) * x)
+        modifiedDeck = take i d ++ drop (i + 1) d
 
 runShuffle :: IO Deck
 runShuffle = do
@@ -164,9 +175,24 @@ prop_shuffle card deck (Rand randomlist) =
   card `belongsTo` deck == card `belongsTo` shuffle randomlist deck
 
 prop_size_shuffle :: Rand -> Deck -> Bool
-prop_size_shuffle (Rand randomlist) deck = undefined
+prop_size_shuffle (Rand randomList) deck = length deck == length result
+  where
+    result = shuffle randomList deck
+
+
 
 -- Task B6 --
 
--- follow the instructions on Canvas
+implementation = Interface
+  {  iFullDeck  = fullDeck
+  ,  iValue     = value
+  ,  iDisplay   = display
+  ,  iGameOver  = gameOver
+  ,  iWinner    = winner
+  ,  iDraw      = draw
+  ,  iPlayBank  = playBank
+  ,  iShuffle   = shuffle
+  }
 
+main :: IO ()
+main = runGame implementation
