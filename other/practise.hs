@@ -104,3 +104,7 @@ removelast xs = take (length xs - 1) xs
 removelast' [] = []
 removelast' [_] = []
 removelast' (x:xs) = x : removelast' xs
+
+
+
+
