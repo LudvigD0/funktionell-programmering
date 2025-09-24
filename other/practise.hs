@@ -107,4 +107,11 @@ removelast' (x:xs) = x : removelast' xs
 
 
 
+--types and classes
 
+
+
+test = ([2,3], ["test","test"])
+
+add' :: Int -> (Int -> Int)
+add' x y = x + y
