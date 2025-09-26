@@ -115,3 +115,11 @@ test = ([2,3], ["test","test"])
 
 add' :: Int -> (Int -> Int)
 add' x y = x + y
+
+
+
+--testinggo :: [Int] -> Int
+testinggo xs = go [] re
+    where
+        go [] re = []
+        go (x:xs) re = x + 1 : go xs

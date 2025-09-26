@@ -81,34 +81,52 @@ allShapes = [Shape (makeSquares s) | s <- shapes]
 
 -- ** A1
 emptyShape :: (Int, Int) -> Shape
-emptyShape = undefined
+emptyShape (y,x) = Shape (replicate y (replicate x Nothing))
 
 -- ** A2
 
 -- | The size (height and width) of a shape (rows x columns)
+
 shapeSize :: Shape -> (Int, Int)
-shapeSize = undefined
+shapeSize shape 
+  | null (rows shape) = (0,0)
+  | otherwise = (y, x)
+    where
+      y = length (rows shape) --height
+      x = length (head (rows shape)) --width
+
+    
 
 -- ** A3
 
 -- | Count how many non-empty squares a shape contains
 blockCount :: Shape -> Int
-blockCount = undefined
+blockCount shape = length nonEmptySquares
+  where
+    con = concat (rows shape)
+    nonEmptySquares = [t | t <- con, t /= Nothing]
 
 -- * The Shape invariant
 
 -- ** A4
 -- | Shape invariant (shapes have at least one row, at least one column,
 -- and are rectangular)
+
+
 prop_Shape :: Shape -> Bool
-prop_Shape = undefined
+prop_Shape shape
+  | nrow <= 0 = False
+  | cols <= 0 = False
+  | otherwise = and [length r == cols | r <- rows shape]
+    where
+      (nrow, cols) = shapeSize shape 
 
 -- * Test data generators
 
 -- ** A5
 -- | A random generator for colours
 genColour :: Gen Colour
-genColour = undefined
+genColour = elements [Black , Red , Green , Yellow , Blue , Purple , Cyan , Grey]
 
 instance Arbitrary Colour where
   arbitrary = genColour
@@ -116,7 +134,7 @@ instance Arbitrary Colour where
 -- ** A6
 -- | A random generator for shapes
 genShape :: Gen Shape
-genShape = undefined
+genShape = elements allShapes
 
 instance Arbitrary Shape where
   arbitrary = genShape
@@ -126,22 +144,49 @@ instance Arbitrary Shape where
 -- ** A7
 -- | Rotate a shape 90 degrees
 rotateShape :: Shape -> Shape
-rotateShape = undefined
+rotateShape shape = Shape (reverse (transpose (rows shape)))
+
+--not using reverse will make the test pass but the shape will not be rotated correctly when looking in the terminal
 
 -- ** A8
 -- | shiftShape adds empty squares above and to the left of the shape
 shiftShape :: (Int, Int) -> Shape -> Shape
-shiftShape = undefined
+shiftShape (y, x) shape = Shape (shiftDown' y (Shape right))
+  where
+    right = shiftRight' x shape
+
+shiftRight' x shape = [replicate x Nothing ++ t | t <- rows shape]
+
+shiftDown' y shape = replicate y (replicate col Nothing) ++ (rows shape)
+  where
+    (row, col) = shapeSize shape
+  
 
 -- ** A9
 -- | padShape adds empty square below and to the right of the shape
 padShape :: (Int, Int) -> Shape -> Shape
-padShape = undefined
+padShape (y, x) shape = Shape (shiftUp' y (Shape left))
+  where
+    left = shiftLeft' x shape
+
+shiftLeft' x shape = [t ++ replicate x Nothing | t <- rows shape]
+  where
+
+
+shiftUp' y shape = (rows shape) ++ replicate y (replicate col Nothing)
+  where
+    (row, col) = shapeSize shape
 
 -- ** A10
 -- | pad a shape to a given size
 padShapeTo :: (Int, Int) -> Shape -> Shape
-padShapeTo = undefined
+padShapeTo (sizeY, sizeX) shape
+  | shapeSize shape >= (sizeY, sizeX) = shape
+  | otherwise = padShape (newRowLength, newColLength) shape
+    where
+      newRowLength = sizeY - row
+      newColLength = sizeX - col
+      (row, col) = shapeSize shape
 
 -- * Comparing and combining shapes
 

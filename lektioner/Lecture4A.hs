@@ -42,7 +42,7 @@ squares1 = map (^2)
  -}
 
 
- evens :: [Int] -> [Int]
+evens :: [Int] -> [Int]
 evens [] = []
 evens(x:xs)
     | even x    = x : evens xs
