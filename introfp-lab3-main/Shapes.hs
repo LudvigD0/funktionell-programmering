@@ -170,8 +170,6 @@ padShape (y, x) shape = Shape (shiftUp' y (Shape left))
     left = shiftLeft' x shape
 
 shiftLeft' x shape = [t ++ replicate x Nothing | t <- rows shape]
-  where
-
 
 shiftUp' y shape = (rows shape) ++ replicate y (replicate col Nothing)
   where
@@ -180,13 +178,12 @@ shiftUp' y shape = (rows shape) ++ replicate y (replicate col Nothing)
 -- ** A10
 -- | pad a shape to a given size
 padShapeTo :: (Int, Int) -> Shape -> Shape
-padShapeTo (sizeY, sizeX) shape
-  | shapeSize shape >= (sizeY, sizeX) = shape
-  | otherwise = padShape (newRowLength, newColLength) shape
+padShapeTo (sizeY, sizeX) shape = padShape (newRowLength, newColLength) shape
     where
-      newRowLength = sizeY - row
-      newColLength = sizeX - col
+      newRowLength = (max shsizeY sizeY) - row
+      newColLength = (max shsizeX sizeX) - col
       (row, col) = shapeSize shape
+      (shsizeY, shsizeX) = shapeSize shape
 
 -- * Comparing and combining shapes
 
@@ -194,16 +191,41 @@ padShapeTo (sizeY, sizeX) shape
 
 -- | Test if two shapes overlap
 overlaps :: Shape -> Shape -> Bool
-overlaps = undefined
-  
+overlaps sh1 sh2 =  or [rowsOverlap sh1Row sh2Row | (sh1Row, sh2Row) <- zip (rows sh1) (rows sh2)]
+
+rowsOverlap :: Row -> Row -> Bool
+rowsOverlap sh1Row sh2Row = or [x1 /= Nothing && x2 /= Nothing | (x1, x2) <- zip sh1Row sh2Row]
+
+
 -- ** B2
 -- | zipShapeWith, like 'zipWith' for lists
+
+{- zipShapeWith f sh1 sh2 = Shape [(go f sh1Row sh2Row) | (sh1Row, sh2Row) <- zip (rows sh1) (rows sh2)] 
+  where 
+    go f (x:xs) (y:ys) = f x y : go f xs ys
+    go _ _ _ = []
+ -}
+ --the function above does the exact same thing, just not declared in the way the assignment wants (and more complicated)
+
+
 zipShapeWith :: (Square -> Square -> Square) -> Shape -> Shape -> Shape
-zipShapeWith = undefined
+zipShapeWith f sh1 sh2 = Shape (zipWith (zipWith f) (rows sh1) (rows sh2))
 
 -- ** B3
 -- | Combine two shapes. The two shapes should not overlap.
 -- The resulting shape will be big enough to fit both shapes.
 combine :: Shape -> Shape -> Shape
-s1 `combine` s2 = undefined
+s1 `combine` s2 | overlaps s1 s2 = error "Combine: The two shapes are overlapping"
+                | otherwise = (zipShapeWith (\x y -> 
+                  if x /= Nothing && y == Nothing then x
+                  else if y /= Nothing && x == Nothing then y 
+                  else Nothing
+                ) (padShapeTo size s1) (padShapeTo size s2))
+                  where 
+                    size = (\(a,b) (c,d) -> (max a c, max b d)) (shapeSize s1) (shapeSize s2)
+                    
+
+
+
+
 

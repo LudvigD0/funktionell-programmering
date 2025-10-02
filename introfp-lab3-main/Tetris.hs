@@ -45,7 +45,7 @@ data Tetris = Tetris
 -- | The size of the well
 -- | The size of the well
 wellSize :: (Int, Int)
-wellSize   = (wellWidth, wellHeight)
+wellSize   = (wellHeight, wellWidth)
 wellWidth  = 10
 wellHeight = 20
 
