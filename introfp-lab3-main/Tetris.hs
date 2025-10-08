@@ -93,14 +93,18 @@ startTetris :: [Double] -> Tetris
 startTetris rs = Tetris (startPosition, piece) well supply
  where
   well         = emptyShape wellSize
-  piece:supply = repeat (allShapes !! 1) -- incomplete !!!
+  piece:supply = [allShapes !! (floor ((fromIntegral (length allShapes)) * x)) | x <- rs]
 
 -- | React to input. The function returns 'Nothing' when it's game over,
 -- and @'Just' (n,t)@, when the game continues in a new state @t@.
 stepTetris :: Action -> Tetris -> Maybe (Int, Tetris)
 stepTetris action t = case action of 
-  Tick      -> tick t
-
+  Tick      -> tick t 
+  MoveDown  -> tick t
+  MoveLeft  -> Just (0, (movePiece (-1) t))
+  MoveRight -> Just (0, (movePiece 1 t))
+  Rotate    -> Just (0, rotatePiece t)
+ 
 
 --B7
 move :: (Int, Int) -> Tetris -> Tetris
@@ -110,9 +114,71 @@ move (y,x) t = Tetris ((py+y, px+x), s) (well t) (shapes t)
     (py, px) = p
 
 
-
 --B8
 tick :: Tetris -> Maybe (Int, Tetris)
-tick t = Just (0, move (1, 0) t)
+tick t
+  | collision t' = dropNewPiece t
+  | otherwise    = Just (0, t')
+  where
+    t' = move (1, 0) t
+
+
+
+--C1
+collision :: Tetris -> Bool
+collision (Tetris ((py, px), s) well shapes)
+  | px < 0                              = True
+  | px + snd (shapeSize s) > wellWidth  = True
+  | py + fst (shapeSize s) > wellHeight = True
+  | overlaps well (place ((py, px), s)) = True
+  | otherwise                           = False
+     
+
+{- MoveLeft -> Just (0, (move (0,1) t))
+MoveRight -> Just (0, (move (0, -1) t)) -}
+--MoveDown -> Just (0, (move (1, 0) t))
+--Rotate -> Just (0, Tetris (pos, rotateShape s) (well t) (shapes t))
+--where
+--(pos, s) = piece t
+
+movePiece :: Int -> Tetris -> Tetris
+movePiece i t
+  | collision (move (0, i) t) = t
+  | otherwise                 = move (0, i) t
+
+
+rotate :: Tetris -> Tetris
+rotate Tetris { piece = (pos, s), well, shapes } = Tetris (pos, rotateShape s) well shapes 
+--using record pattern matching to clarify where pos and s comes from
+
+
+
+adjust :: Tetris -> Tetris
+adjust = undefined --todo
+
+rotatePiece :: Tetris -> Tetris
+rotatePiece t 
+  | collision (rotate t) = t
+  | otherwise = rotate t
+    
+
+
+dropNewPiece :: Tetris -> Maybe (Int, Tetris)
+dropNewPiece (Tetris piece well shapes)
+  | overlaps (place piece) well = error "Game end"
+  | otherwise = Just (n, Tetris (startPosition, (head shapes)) s (tail shapes))
+  where
+    (n, s) = clearLines (combine (place piece) well) 
+
+
+clearLines :: Shape -> (Int, Shape)
+clearLines shape = (length newRows, (Shape (newRows ++ newS)))
+  where
+    newS = [row | row <- rows shape, elem Nothing row]                  --retunerar en row när det finns Nothing i den, alltså är den ej "klar"
+    newRows = replicate (length (rows shape) - (length newS)) (replicate col Nothing)
+    (row, col) = shapeSize shape
+    
+
+
 
 

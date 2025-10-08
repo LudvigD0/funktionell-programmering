@@ -35,3 +35,6 @@ data Name = First String | Middle Name String deriving Show
 
 ludvig :: Name
 ludvig = Middle
+
+
+data Car = 
