@@ -5,6 +5,9 @@ Copyright   : (c) TDA555/DIT441, Introduction to Functional Programming
 License     : BSD
 Maintainer  : alexg@chalmers.se
 Stability   : experimental
+
+Authors : <Elliot Forst, Ludvig Dahlgren, Gabriel Hasan>
+Lab group : <Group 51>
 -}
 
 module Shapes where
@@ -180,10 +183,9 @@ shiftUp' y shape = (rows shape) ++ replicate y (replicate col Nothing)
 padShapeTo :: (Int, Int) -> Shape -> Shape
 padShapeTo (sizeY, sizeX) shape = padShape (newRowLength, newColLength) shape
     where
-      newRowLength = (max shsizeY sizeY) - row
-      newColLength = (max shsizeX sizeX) - col
+      newRowLength = max 0 (sizeY - row)
+      newColLength = max 0 (sizeX - col)
       (row, col) = shapeSize shape
-      (shsizeY, shsizeX) = shapeSize shape
 
 -- * Comparing and combining shapes
 
@@ -200,14 +202,6 @@ rowsOverlap sh1Row sh2Row = or [x1 /= Nothing && x2 /= Nothing | (x1, x2) <- zip
 -- ** B2
 -- | zipShapeWith, like 'zipWith' for lists
 
-{- zipShapeWith f sh1 sh2 = Shape [(go f sh1Row sh2Row) | (sh1Row, sh2Row) <- zip (rows sh1) (rows sh2)] 
-  where 
-    go f (x:xs) (y:ys) = f x y : go f xs ys
-    go _ _ _ = []
- -}
- --the function above does the exact same thing, just not declared in the way the assignment wants (and more complicated)
-
-
 zipShapeWith :: (Square -> Square -> Square) -> Shape -> Shape -> Shape
 zipShapeWith f sh1 sh2 = Shape (zipWith (zipWith f) (rows sh1) (rows sh2))
 
@@ -216,16 +210,13 @@ zipShapeWith f sh1 sh2 = Shape (zipWith (zipWith f) (rows sh1) (rows sh2))
 -- The resulting shape will be big enough to fit both shapes.
 combine :: Shape -> Shape -> Shape
 s1 `combine` s2 | overlaps s1 s2 = error "Combine: The two shapes are overlapping"
-                | otherwise = (zipShapeWith (\x y -> 
-                  if x /= Nothing && y == Nothing then x
-                  else if y /= Nothing && x == Nothing then y 
-                  else Nothing
-                ) (padShapeTo size s1) (padShapeTo size s2))
+                | otherwise = (zipShapeWith merge (padShapeTo size s1) (padShapeTo size s2))
                   where 
                     size = (\(a,b) (c,d) -> (max a c, max b d)) (shapeSize s1) (shapeSize s2)
                     
-
-
-
-
+                    merge Nothing Nothing = Nothing
+                    merge (Just x) Nothing = Just x 
+                    merge Nothing (Just x) = Just x 
+                    merge (Just _) (Just _) = Nothing
+ 
 

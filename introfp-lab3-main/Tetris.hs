@@ -5,6 +5,9 @@ Copyright   : (c) TDA555/DIT441, Introduction to Functional Programming
 License     : BSD
 Maintainer  : alexg@chalmers.se
 Stability   : experimental
+
+Authors : <Elliot Forst, Ludvig Dahlgren, Gabriel Hasan>
+Lab group : <Group 51>
 -}
 
 module Tetris where
@@ -43,7 +46,6 @@ data Tetris = Tetris
   }
 
 -- | The size of the well
--- | The size of the well
 wellSize :: (Int, Int)
 wellSize   = (wellHeight, wellWidth)
 wellWidth  = 10
@@ -61,18 +63,30 @@ add :: Pos -> Pos -> Pos
 place :: Piece -> Shape
 place (v, s) = shiftShape v s
 
+--B4
 -- | An invariant that startTetris and stepTetris should uphold
 prop_Tetris :: Tetris -> Bool
-prop_Tetris t = True -- incomplete !!!
+prop_Tetris t = prop_Shape s && shapeSize(well t) == wellSize 
+  where 
+    (pos, s) = piece t
 
+
+--B5
 -- | Add black walls around a shape
 addWalls :: Shape -> Shape
-addWalls s = s -- incomplete !!!
+addWalls s = Shape (lob: [[Just Black] ++ t ++ [Just Black] | t <- rows s] ++ [lob])
+  where
+    lob = replicate (snd (shapeSize s) + 2) (Just Black)
 
+
+--B6
 -- | Visualize the current game state. This is what the user will see
 -- when playing the game.
 drawTetris :: Tetris -> Shape
-drawTetris (Tetris piece well _) = well -- incomplete !!!
+drawTetris (Tetris piece well _) = addWalls (combine (shiftShape pos s) well)  
+  where
+    (pos, s) = piece
+--B6 END
 
 -- | The initial game state
 startTetris :: [Double] -> Tetris
@@ -84,5 +98,21 @@ startTetris rs = Tetris (startPosition, piece) well supply
 -- | React to input. The function returns 'Nothing' when it's game over,
 -- and @'Just' (n,t)@, when the game continues in a new state @t@.
 stepTetris :: Action -> Tetris -> Maybe (Int, Tetris)
-stepTetris action t = Just (0,t) -- incomplete !!!
+stepTetris action t = case action of 
+  Tick      -> tick t
+
+
+--B7
+move :: (Int, Int) -> Tetris -> Tetris
+move (y,x) t = Tetris ((py+y, px+x), s) (well t) (shapes t) 
+  where 
+    (p, s) = piece t
+    (py, px) = p
+
+
+
+--B8
+tick :: Tetris -> Maybe (Int, Tetris)
+tick t = Just (0, move (1, 0) t)
+
 
