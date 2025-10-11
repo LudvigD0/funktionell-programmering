@@ -1,0 +1,129 @@
+=== Part A ===
+
+Task A1: emptyShape
+  Should have the correct size and only contain Nothing elems: [✔]
+    +++ OK, passed 100 tests.
+Task A2: shapeSize
+  The size of a empty shape is (0,0):  [✔]
+  Correct size:  [✔]
+    +++ OK, passed 100 tests.
+Task A3: blockCount
+  The count of an empty shape:  [✔]
+  Correct count:  [✔]
+    +++ OK, passed 100 tests.
+Task A4: prop_Shape
+  Should hold for all given shapes [✔]
+    +++ OK, passed 100 tests.
+  Should fail for the empty shape:  [✔]
+  Should fail for an irregular shape:  [✔]
+Task A5: genColour
+  Should generate all possible colours:  [✔]
+    +++ OK, passed 100 tests.
+Task A6: genShape
+  Should generate valid shapes:  [✔]
+    +++ OK, passed 100 tests.
+Task A7: rotateShape
+  Should not change the block count:  [✔]
+    +++ OK, passed 100 tests.
+  Rotating four times should give the same shape:  [✔]
+    +++ OK, passed 100 tests.
+  Rotating M x N shape gives a N x M shape:  [✔]
+    +++ OK, passed 100 tests.
+Task A8: shiftShape
+  Expands the right amount [✔]
+    +++ OK, passed 100 tests.
+  The original shape should be preserved:  [✔]
+    +++ OK, passed 100 tests.
+  The added rows and columns should be empty:  [✔]
+    +++ OK, passed 100 tests.
+Task A9: padShape
+  Expands the right amount [✔]
+    +++ OK, passed 100 tests.
+  The original shape should be preserved:  [✔]
+    +++ OK, passed 100 tests.
+  The added rows and columns should be empty:  [✔]
+    +++ OK, passed 100 tests.
+
+Finished in 0.0678 seconds
+19 examples, 0 failures
+=== Part B ===
+
+Task B1: overlaps
+  Tetrominos should not overlap with an empty shape:  [✔]
+    +++ OK, passed 100 tests.
+  A tetromino overlaps with itself:  [✔]
+  A tetromino overlaps with any other tetromino:  [✔]
+    +++ OK, passed 100 tests.
+Task B2: zipShapeWith
+  Zipping with an empty shape of equal size:  [✔]
+    +++ OK, passed 100 tests.
+  Check size:  [✔]
+    +++ OK, passed 100 tests.
+Task B3: combine
+  Combining with an empty shape of same size:  [✔]
+    +++ OK, passed 100 tests.
+  Should crash on overlapping shapes:  [✔]
+    +++ OK, passed 100 tests.
+Task B4: prop_Tetris
+  Should detect incorrect well size [✔]
+  Should detect invalid shape [✔]
+Task B5: addWalls
+  The size should increase:  [✔]
+    +++ OK, passed 100 tests.
+  The border should be black [✔]
+    +++ OK, passed 100 tests.
+Task B6: drawTetris
+  Should be a valid shape of the right size with black walls:  [✔]
+    +++ OK, passed 100 tests.
+  The falling piece should be drawn:  [✔]
+    +++ OK, passed 100 tests.
+Task B7: move
+  Should (only) change the position of the piece:  [✔]
+    +++ OK, passed 100 tests.
+Task B8: tick
+  Expands the right amount [✔]
+    +++ OK, passed 100 tests.
+
+Finished in 0.0477 seconds
+15 examples, 0 failures
+=== Part C ===
+
+Task C1: overlaps
+  Too far to the left should collide:  [✔]
+  Too far to the right should collide:  [✔]
+  Too far down should collide [✔]
+  Collision with the well:  [✔]
+  No collision:  [✔]
+    +++ OK, passed 100 tests.
+Task C1: tick
+  Tick should move the piece down:  [✔]
+Task C2: stepTetris
+  A MoveDown event should drop the piece:  [✔]
+    +++ OK, passed 100 tests.
+Task C3: movePiece
+  Calling with 1 should move one pos to the right:  [✔]
+  Calling with (-1) should move one pos to the left:  [✔]
+  A move resulting in a collision should be ignored:  [✔]
+  Should handle the MoveLeft action:  [✔]
+  Should handle the MoveRight action:  [✔]
+Task C4: rotate
+  Rotates piece:  [✔]
+Task C5: adjust
+  The adjust function is optional and not tested:  [✔]
+Task C6: rotatePiece
+  Should rotate if no collision:  [✔]
+  Handle the Rotate action:  [✔]
+Task C7: dropNewPiece
+  Should change the well, get a shape from the supply, and not collide:  [✔]
+    +++ OK, passed 100 tests.
+Task C8: startTetris
+  The supply should offer all kinds of shapes:  [✔]
+Task C9: clearLines
+  Should clear the right amount of lines:  [✔]
+    +++ OK, passed 100 tests.
+Task C10: test all
+  Play random moves, all steps should be valid:  [✔]
+    +++ OK, passed 100 tests.
+
+Finished in 0.4481 seconds
+20 examples, 0 failures

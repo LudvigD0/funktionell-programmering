@@ -108,10 +108,7 @@ stepTetris action t = case action of
 
 --B7
 move :: (Int, Int) -> Tetris -> Tetris
-move (y,x) t = Tetris ((py+y, px+x), s) (well t) (shapes t) 
-  where 
-    (p, s) = piece t
-    (py, px) = p
+move (y,x) (Tetris ((py,px), s) well shapes) = Tetris ((py+y, px+x), s) well shapes
 
 
 --B8
@@ -132,45 +129,57 @@ collision (Tetris ((py, px), s) well shapes)
   | py + fst (shapeSize s) > wellHeight = True
   | overlaps well (place ((py, px), s)) = True
   | otherwise                           = False
-     
 
-{- MoveLeft -> Just (0, (move (0,1) t))
-MoveRight -> Just (0, (move (0, -1) t)) -}
---MoveDown -> Just (0, (move (1, 0) t))
---Rotate -> Just (0, Tetris (pos, rotateShape s) (well t) (shapes t))
---where
---(pos, s) = piece t
+--C2
+--We added moveDown action in stepTetris
 
+--C3
 movePiece :: Int -> Tetris -> Tetris
 movePiece i t
-  | collision (move (0, i) t) = t
+  | collision (move (0, i) t) = t                     --checking collision on the future placement
   | otherwise                 = move (0, i) t
 
 
+
+--C4
 rotate :: Tetris -> Tetris
 rotate Tetris { piece = (pos, s), well, shapes } = Tetris (pos, rotateShape s) well shapes 
 --using record pattern matching to clarify where pos and s comes from
 
 
-
+--C5
 adjust :: Tetris -> Tetris
-adjust = undefined --todo
+adjust t@(Tetris ((py,px), s) well shapes)
+  | px + snd (shapeSize s) > wellWidth  = movePiece dist t
+  | py + fst (shapeSize s) > wellHeight = move (dist, 0) t
+  | otherwise                           = t
+  where 
+    (row, col) = shapeSize s
+    dist = (min row col) - (max row col) --calculating the dist since this adjust function also allow rotation on the bottom when shape is more wide than narrow
 
+
+
+--C6
 rotatePiece :: Tetris -> Tetris
 rotatePiece t 
-  | collision (rotate t) = t
-  | otherwise = rotate t
-    
+  | not (collision (rotate t)) =  rotate t
+  | not (collision (adjust $ rotate t)) = adjust $ rotate t
+  | otherwise = t
 
-
+--C7
 dropNewPiece :: Tetris -> Maybe (Int, Tetris)
 dropNewPiece (Tetris piece well shapes)
-  | overlaps (place piece) well = error "Game end"
+  | overlaps (place (startPosition, (head shapes))) s = Nothing
   | otherwise = Just (n, Tetris (startPosition, (head shapes)) s (tail shapes))
   where
     (n, s) = clearLines (combine (place piece) well) 
 
 
+--C8
+--Fixed startTetris
+
+
+--C9
 clearLines :: Shape -> (Int, Shape)
 clearLines shape = (length newRows, (Shape (newRows ++ newS)))
   where
@@ -179,6 +188,6 @@ clearLines shape = (length newRows, (Shape (newRows ++ newS)))
     (row, col) = shapeSize shape
     
 
-
-
+--C10
+--Implemented clearLines in dropNewPiece
 
