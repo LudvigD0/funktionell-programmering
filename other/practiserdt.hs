@@ -76,3 +76,39 @@ data Car = Model String | Year Car Int deriving Show
 
 test :: Car
 test = Year ( Model "Volvo hamster") 2013
+
+
+data Nat = Zero | Succ Nat deriving (Eq, Ord, Show)
+
+add :: Nat -> Nat -> Nat
+add a Zero     = a
+add a (Succ b) = Succ (a `add` b)
+
+
+len :: [a] -> Nat
+len [] = Zero
+len (x:xs) = Succ (len xs)
+
+sub :: Nat -> Nat -> Nat
+sub Zero (Succ b)     = error "This will result in a negative Natural Number, which doesn't exist"
+sub a Zero            = a
+sub (Succ a) (Succ b) = (sub a b)
+
+prop_associative :: Nat -> Nat -> Nat -> Bool
+prop_associative a b c | add (add a b) c == add a (add b c) = True
+
+
+data Diagram 
+  = Question String Diagram Diagram
+  | Action String Diagram
+  | Done
+  deriving (Show, Eq)
+
+
+isSunny, park, work :: Diagram
+isSunny = Question "Is it sunny outside?" park work
+park    = Action "Go to the park! And write some Haskell code!" Done
+work    = Action "Write some Haskell code!" Done
+
+
+--mapAction :: (String -> String) -> Diagram -> Diagram

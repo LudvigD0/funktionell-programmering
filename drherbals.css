@@ -1,0 +1,18 @@
+.site-tools ul {
+    display:flex;
+    gap: 3px;
+    justify-content:right;
+}
+
+.site-tools ul .shopping-bag-button {
+    order: 99;
+    margin-left:20px!important;
+}
+
+.site-tools ul .my_account_icon {
+    order: 50;
+}
+
+.site-tools ul .hide-for-large {
+    order:150;
+}
