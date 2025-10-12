@@ -111,4 +111,104 @@ park    = Action "Go to the park! And write some Haskell code!" Done
 work    = Action "Write some Haskell code!" Done
 
 
---mapAction :: (String -> String) -> Diagram -> Diagram
+mapAction :: (String -> String) -> Diagram -> Diagram
+mapAction f Done                  = Done
+mapAction f (Action str rest)  = Action (f str) (mapAction f rest)
+mapAction f (Question str yes no) = Question str (mapAction f yes) (mapAction f no)
+
+
+
+
+
+
+
+
+
+data Student = Student
+  { name      :: String
+  , socialNum :: Int
+  , email     :: String
+  , courses   :: [(Course, Grade)] 
+  } deriving Show
+
+data Grade = U | Three | Four | Five deriving (Eq, Show)
+
+data Course = Course
+  { code    :: Code
+  , credits :: Double
+  , preReqs :: [Course]
+  } deriving Show
+
+data Examiner = Examiner
+    {
+        examinerName :: String
+        , examinerSocialNum :: Int
+    } deriving Show
+
+
+
+instance Eq Course where
+  c1 == c2 = code c1 == code c2
+
+data Code = CTH String | GU String | SAM String String deriving (Eq, Show)
+
+
+
+mats, lise, sofie :: Student
+mats  = Student "Mats"  1234 "mats@gbla.nl" [(tda555, U)]
+lise  = Student "Lise"  3132 "lise@bla.nl" [(tda555, Three)]
+sofie = Student "Sofie" 6586 "sofie@bla.nl" []
+
+tda555 :: Course
+tda555 = Course (SAM "TDA555" "DIT441") 7.5 []
+
+grade :: Course -> Grade -> Student -> Student
+grade c g s  = s { courses = (c,g) : courses s}
+
+data CourseInstance = CourseInstance 
+    { course :: Course
+    , examiner :: Examiner
+    , students :: [Student]
+    , period :: String
+    , ta :: [String]
+    } deriving Show
+
+alexExaminer :: Examiner
+alexExaminer = Examiner {examinerName = "Alex", examinerSocialNum = 1234}
+--alexExaminer = Examiner "Alex" 1234
+
+
+courseInstance1 :: CourseInstance
+courseInstance1 = CourseInstance tda555 alexExaminer [lise, mats] "HT2025" ["Daniel Andersson"]
+
+
+
+
+
+data Row a 
+  = Empty
+  | AddLeft a (Row a)
+  | AddRight (Row a) a
+  deriving (Eq, Show)
+
+-- Smart constructors
+(<|) :: a -> Row a -> Row a
+x <| r = AddLeft x r
+
+(|>) :: Row a -> a -> Row a
+r |> x = AddRight r x
+
+-- Fix fixity
+infixr 6 <|
+infixl 5 |>
+
+
+start :: Row a -> Maybe a
+start row = case row of
+  Empty        -> Nothing
+  AddLeft x _  -> Just x
+  AddRight r _ -> start r
+
+
+end :: Row a -> Maybe a
+end = undefined
