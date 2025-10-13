@@ -123,12 +123,13 @@ tick t
 
 --C1
 collision :: Tetris -> Bool
-collision (Tetris ((py, px), s) well shapes)
-  | px < 0                              = True
-  | px + snd (shapeSize s) > wellWidth  = True
-  | py + fst (shapeSize s) > wellHeight = True
-  | overlaps well (place ((py, px), s)) = True
-  | otherwise                           = False
+collision (Tetris ((py, px), s) well shapes) = 
+  px < 0
+  || px + snd (shapeSize s) > wellWidth
+  || py + fst (shapeSize s) > wellHeight
+  || overlaps well (place ((py, px), s))
+--using || that means "or", we use this instead of guards
+--when one of the conditions is true, it returns true which means collision
 
 --C2
 --We added moveDown action in stepTetris
@@ -145,6 +146,7 @@ movePiece i t
 rotate :: Tetris -> Tetris
 rotate t@(Tetris {piece = (pos,s )}) = t{ piece = (pos, rotateShape s)}
 --using record pattern matching to clarify where pos and s comes from
+--we also return with record syntax for clarity purposes
 
 
 --C5
@@ -156,7 +158,7 @@ adjust t@(Tetris ((py,px), s) well shapes)
   where 
     (row, col) = shapeSize s
     dist = (min row col) - (max row col) --calculating the distance
---need to use min and max, since we allow rotation at bottom when shape is wider
+--using min and max, since we allow rotation at bottom when shape is wider
 
 
 
@@ -164,8 +166,8 @@ adjust t@(Tetris ((py,px), s) well shapes)
 rotatePiece :: Tetris -> Tetris
 rotatePiece t 
   | not (collision (rotate t)) =  rotate t
-  | not (collision (adjust $ rotate t)) = adjust $ rotate t
-  | otherwise = t
+  | not (collision (adjust $ rotate t)) = adjust $ rotate t --dollar sign instead of paranthases
+  | otherwise = t --if there a collision, then return just t
 
 --C7
 dropNewPiece :: Tetris -> Maybe (Int, Tetris)
@@ -173,7 +175,7 @@ dropNewPiece (Tetris piece well (shape:shapes)) --instead of using head & tail, 
   | overlaps (place (startPosition, shape)) s = Nothing
   | otherwise = Just (n, Tetris (startPosition, shape) s shapes)
   where
-    (n, s) = clearLines (combine (place piece) well) 
+    (n, s) = clearLines (combine (place piece) well) --using place to update correct position before combining
 
 
 --C8
