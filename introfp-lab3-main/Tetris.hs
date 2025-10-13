@@ -93,7 +93,7 @@ startTetris :: [Double] -> Tetris
 startTetris rs = Tetris (startPosition, piece) well supply
  where
   well         = emptyShape wellSize
-  piece:supply = [allShapes !! (floor ((fromIntegral (length allShapes)) * x)) | x <- rs]
+  piece:supply = [allShapes !! (min (floor ((fromIntegral (length allShapes)) * x)) 6) | x <- rs]
 
 -- | React to input. The function returns 'Nothing' when it's game over,
 -- and @'Just' (n,t)@, when the game continues in a new state @t@.
@@ -143,7 +143,7 @@ movePiece i t
 
 --C4
 rotate :: Tetris -> Tetris
-rotate Tetris { piece = (pos, s), well, shapes } = Tetris (pos, rotateShape s) well shapes 
+rotate t@(Tetris {piece = (pos,s )}) = t{ piece = (pos, rotateShape s)}
 --using record pattern matching to clarify where pos and s comes from
 
 
@@ -151,11 +151,12 @@ rotate Tetris { piece = (pos, s), well, shapes } = Tetris (pos, rotateShape s) w
 adjust :: Tetris -> Tetris
 adjust t@(Tetris ((py,px), s) well shapes)
   | px + snd (shapeSize s) > wellWidth  = movePiece dist t
-  | py + fst (shapeSize s) > wellHeight = move (dist, 0) t
+  | py + fst (shapeSize s) > wellHeight = move (dist, 0) t --this row allows one rotation before it hits the ground
   | otherwise                           = t
   where 
     (row, col) = shapeSize s
-    dist = (min row col) - (max row col) --calculating the dist since this adjust function also allow rotation on the bottom when shape is more wide than narrow
+    dist = (min row col) - (max row col) --calculating the distance
+--need to use min and max, since we allow rotation at bottom when shape is wider
 
 
 
@@ -168,9 +169,9 @@ rotatePiece t
 
 --C7
 dropNewPiece :: Tetris -> Maybe (Int, Tetris)
-dropNewPiece (Tetris piece well shapes)
-  | overlaps (place (startPosition, (head shapes))) s = Nothing
-  | otherwise = Just (n, Tetris (startPosition, (head shapes)) s (tail shapes))
+dropNewPiece (Tetris piece well (shape:shapes)) --instead of using head & tail, we use pattern matching
+  | overlaps (place (startPosition, shape)) s = Nothing
+  | otherwise = Just (n, Tetris (startPosition, shape) s shapes)
   where
     (n, s) = clearLines (combine (place piece) well) 
 
@@ -181,12 +182,11 @@ dropNewPiece (Tetris piece well shapes)
 
 --C9
 clearLines :: Shape -> (Int, Shape)
-clearLines shape = (length newRows, (Shape (newRows ++ newS)))
+clearLines shape = (length newRows, (Shape (newRows ++ newS))) --adding the empty rows before the filtered rows
   where
-    newS = [row | row <- rows shape, elem Nothing row]                  --retunerar en row när det finns Nothing i den, alltså är den ej "klar"
-    newRows = replicate (length (rows shape) - (length newS)) (replicate col Nothing)
-    (row, col) = shapeSize shape
-    
+    newS = filter (elem Nothing) (rows shape) --using filter to bring along the rows containing "Nothing"
+    newRows = replicate (length (rows shape) - (length newS)) (replicate col Nothing) --calculates new empty rows, based on the new rows
+    (_, col) = shapeSize shape
 
 --C10
 --Implemented clearLines in dropNewPiece
