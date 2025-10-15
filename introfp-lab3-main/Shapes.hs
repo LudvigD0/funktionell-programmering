@@ -118,9 +118,9 @@ blockCount shape = length nonEmptySquares
 
 prop_Shape :: Shape -> Bool
 prop_Shape shape
-  | nrow <= 0 = False
-  | cols <= 0 = False
-  | otherwise = and [length r == cols | r <- rows shape]
+  | nrow <= 0 = False --height has to be less or equal to 0
+  | cols <= 0 = False --width has to be less or equal to 0
+  | otherwise = and [length r == cols | r <- rows shape] --check that it is rectangular
     where
       (nrow, cols) = shapeSize shape 
 

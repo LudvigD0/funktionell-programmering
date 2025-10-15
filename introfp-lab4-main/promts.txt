@@ -1,0 +1,128 @@
+1.
+
+I have an assignment that is designed specifically for things that are hard for a coding assistant like you. Here are the lab instructions: Preparations The lab builds on the material from weeks 5-6 on recursive data types. Before you start working: Download the zip file Download zip filecontaining the necessary files. The file Poly.hs provides: An abstract type Poly representing polynomial expressions. (“Abstract” means that its constructors are hidden; you can only build values using the provided functions.), fromList :: [Int] -> Poly for converting a list of numbers into a polynomial, toList :: Poly -> [Int] for converting in the other direction, evalPoly :: Int -> Poly -> Int evaluates a polynomial for a given integer value. Watch the short video introducing Poly.hs: You are not required to inspect the source of Poly.hs, but you may do so if you are curious. (It only uses Haskell features you have already seen.) Try loading Poly.hs in GHCi and running fromList [1,2,3,4,5] to confirm that it works. The file Parser.hs provides a small parser combinator library that you will use later. You will need to submit the instructions to the coding assistants (the prompts) along with your source code. So, save the instructions in a separate text file, whenever you use the coding assistant.Lab description In this lab, you will implement, with the aid of a coding assistant a simplifier for symbolic arithmetic expressions involving addition, multiplication, and integer exponentiation (that is, expressions of the form xn where n is a non-negative integer). You (and the assistant) must use (but not modify) a Haskell module called Poly.hs, which exports a type Poly for representing polynomials-expressions like x3 − 3x + 7. The simplifier will work by converting expressions to polynomials, and then converting them back again. Since polynomials are stored in a canonical (standardized) form, this round-trip conversion automatically performs the simplification. For example: The expression (x + x) + 3 will be simplified to 2x + 3. The expression x * (x + 2) becomes x2 + 2x. and here is the first task: A1 - define the expression type Ask the coding assistant to define a data type Expr to represent arithmetic expressions. The data type should be able to represent, integers, expressions built using addition and multiplication, and integer powers of a single variable e.g. x2, x9, x10 etc. All integers here should make use of Haskell’s Int type. For binary operators it should use a single constructor and you must make use of the helper data type BinOp: data BinOp = AddOp | MulOp It should not be able to represent exponential expressions which are anything except x raised to some integer power, so for example you should not be able to represent x(1 + 1), 2x, 23, etc. Similarly, it should not be able to represent expressions with more than one variable, so you should not be able to represent x + y.
+
+
+2.
+jag har en ny uppgift, och jag har börjat lite på den men vet ej om det är rätt:
+instance Show Expr where 
+  show = showExpr
+
+showExpr expr = case expr of 
+  (Const a)   -> show a
+  (PowX a)    -> ("x")
+  (Bin x y z) -> "("
+
+
+
+instruktion:
+A3 - Show instance
+Use the coding assistant to make Expr an instance of Show, which makes sure that only brackets are added where they are needed. Use Haskell notation for exponents e.g. x^2. The instance should show x1 as just x, but otherwise it should not simplify your expressions in any way before it shows them.
+
+Again, test the implementation by showing some example expressions. Carefully think about the test input.
+
+3.
+
+what is up with this? prec :: Expr -> Int prec (Bin AddOp _ _) = 6 prec (Bin MulOp _ _) = 7 prec _ = 10 btw I use PowX? and isn't this possible to make it more simple=?
+
+
+
+4.
+
+ok but is there any way to make it more readable and also ensures its still correct?
+
+5.
+
+varför lägger du till data Prec = Top | AddP | MulP deriving.... är detta nödvändigt
+
+6.
+
+förresten det var XPow jag använde, men jag får ghci> show (Bin AddOp (Bin AddOp x x) (Const 3)) <interactive>:54:28: error: [GHC-88464] Variable not in scope: x :: Expr <interactive>:54:30: error: [GHC-88464] Variable not in scope: x :: Expr ?
+
+7.
+
+men jag egentligen önskat att du skrev det mer som pattermatching där show pattermatchar direkt, alltså typ show (Const ...... sedan för resten.... please give me the bets solution for the problem, remember that these are your instructions:A3 - Show instance Use the coding assistant to make Expr an instance of Show, which makes sure that only brackets are added where they are needed. Use Haskell notation for exponents e.g. x^2. The instance should show x1 as just x, but otherwise it should not simplify your expressions in any way before it shows them. Again, test the implementation by showing some example expressions. Carefully think about the test input.
+
+8.
+
+is this solution better, its from a friend... instance Show Expr where show (Const n) = show n show (PowX n) | n == 1 = "x" | otherwise = "x^" ++ show n -- PowX and determine if its a x or x^n show (BinExpr op l r) = showLeft l ++ showOp op ++ showRight r where showOp AddOp = " + " showOp MulOp = " * " -- Lägg parenteser om det behövs showLeft e@(BinExpr AddOp _ _) | op == MulOp = "(" ++ show e ++ ")" -- (a+b)*c | otherwise = show e showLeft e = show e showRight e@(BinExpr AddOp _ _) | op == MulOp = "(" ++ show e ++ ")" -- a*(b+c) | otherwise = show e showRight e = show e
+
+9.
+
+okej en ny uppgift nu: Let the coding assistant make Expr an instance of Arbitrary and check the data type invariant that you defined in A2 using QuickCheck. You should make sure that the generated expressions are not too big. Hint: we discussed in a lecture how to write a generator that takes the size of the to be generated expression as an argument. Pass this information on to the coding assistant. You can then use the sized QuickCheck combinator function to create a generator.
+
+10.
+
+vad kommer 3 och 7 ifrån? skriv den med best practise metoder endast
+
+11.
+
+hjälper denna koden dig att formulera en kortare och bättre version? data Tree a = Empty | Node (Tree a) a (Tree a) deriving (Show, Eq) leaf :: a -> Tree a leaf x = Node Empty x Empty t :: Tree Int t = Node (Node (leaf 2) 3 (leaf 4)) 6 (Node (leaf 7) 8 (leaf 9)) -- The number of elements in a tree sizeTree :: Tree a -> Int sizeTree t = case t of Empty -> 0 Node l _ r -> sizeTree l + 1 + sizeTree r -- The height of a binary tree height :: Tree a -> Int height t = case t of Empty -> -1 Node l _ r -> 1 + max (height l) (height r) -- Fold over a tree mapTree :: (a -> b) -> Tree a -> Tree b mapTree f tree = case tree of Empty -> Empty Node l x r -> Node (mapTree f l) (f x) (mapTree f r) -- Lookup a value in a tree, must be a binary search tree! -- lookupTree :: Ord a => a -> Tree a -> Maybe a -- Back to prez! -- * A representation of simple arithmetic expressions ------------------------- data Expr = Num Int | Add Expr Expr | Mul Expr Expr deriving (Eq) -- type Name = String -- type Env = [(Name, Int)] e1, e2 :: Expr e1 = Mul (Add (Num 1) (Num 2)) (Num 3) e2 = Add (Num 1) (Mul (Num 2) (Num 3)) -- * Showing expressions ------------------------------------------------------- showExpr :: Expr -> String showExpr expr = case expr of Num n -> show n Add x y -> showExpr x ++ " + " ++ showExpr y Mul x y -> showFactor x ++ " * " ++ showFactor y where showFactor (Add x y) = "(" ++ showExpr (Add x y) ++ ")" showFactor e = showExpr e instance Show Expr where show = showExpr instance Num Expr where (+) = Add (*) = Mul fromInteger = Num . fromInteger -- x, y :: Expr -- x = Var "x" -- y = Var "y" -- e3, e4, e5 :: Expr -- e3 = 1 + 2 * 3 -- e4 = 4 * (5 + 1) + 3 -- e5 = x * x + y * y + 5 -- * Evaluate (compute the value of) an expression ----------------------------- eval :: Expr -> Int eval expr = case expr of Num n -> n Add x y -> eval x + eval y Mul x y -> eval x * eval y -- * Generating arbitrary expressions ------------------------------------------ -- Random generator (first version, with bad control of size) genExprBad :: Gen Expr genExprBad = oneof [genNum, genOp] where genNum = do n <- choose (0, 10) return (Num n) genOp = do op <- elements [Add, Mul] e1 <- genExprBad e2 <- genExprBad return (op e1 e2) -- Random generator with control over the size genExpr :: Int -> Gen Expr genExpr n | n < 2 = genNum | otherwise = genOp where genNum = do n <- choose (0, 10) return (Num n) genOp = do op <- elements [Add, Mul] m <- choose (1, n-1) e1 <- genExpr (n - m) e2 <- genExpr m return (op e1 e2)
+
+12.
+
+fast varför är den så onödigt lång? du ska ju bara göra en en enkel arbitrary instans som kollar så en invariant håller, detta är invarianten:
+prop_Expr :: Expr -> Bool
+prop_Expr (Const x) = True 
+prop_Expr (XPow y)  = y >= 0
+prop_Expr (Bin _ l r) = prop_Expr l && prop_Expr r
+
+
+13.
+
+förklara varför man använder 5 här, och varför vi har två instances, jag gillar däremot koden du gjort nu för den är kort osv. 
+
+14.
+
+okej nästa fråga följer : A5 - evaluation function Instruct the coding assistant to define a function eval :: Int -> Expr -> Int that takes a value for x and an expression and evaluates it. Write (without aid) a set of QuickCheck properties to validate your implementation. These properties should automatically test whether your evaluation function behaves as expected under various random inputs. For example, you could generate two random expressions, e1 and e2, and a random value for x. Then, verify that: The sum of evaluating e1 and evaluating e2 separately is equal to the result of evaluating their combination using the binary plus operator in your Expr data type. This is just one possible property, there are many other useful relationships you can define to test the correctness and consistency of your evaluation function.
+
+15.
+
+okej nästa fråga följer : A5 - evaluation function Instruct the coding assistant to define a function eval :: Int -> Expr -> Int that takes a value for x and an expression and evaluates it. Write (without aid) a set of QuickCheck properties to validate your implementation. These properties should automatically test whether your evaluation function behaves as expected under various random inputs. For example, you could generate two random expressions, e1 and e2, and a random value for x. Then, verify that: The sum of evaluating e1 and evaluating e2 separately is equal to the result of evaluating their combination using the binary plus operator in your Expr data type. This is just one possible property, there are many other useful relationships you can define to test the correctness and consistency of your evaluation function.
+
+16.
+
+okej nästa fråga följer : A5 - evaluation function Instruct the coding assistant to define a function eval :: Int -> Expr -> Int that takes a value for x and an expression and evaluates it. Write (without aid) a set of QuickCheck properties to validate your implementation. These properties should automatically test whether your evaluation function behaves as expected under various random inputs. For example, you could generate two random expressions, e1 and e2, and a random value for x. Then, verify that: The sum of evaluating e1 and evaluating e2 separately is equal to the result of evaluating their combination using the binary plus operator in your Expr data type. This is just one possible property, there are many other useful relationships you can define to test the correctness and consistency of your evaluation function.
+
+17.
+
+det står i koden där jag ska pastea in "Write properties" menar dem tester eller vad menas?
+
+18.
+
+vadå en "kort" uppsättning, detdär är extremt mycket tester, behöver man verkligen det, kom ihåg vad uppgiften faktiskt frågade efter
+
+19.
+
+A6 - converting expressions to polynomials
+okej nästa fråga är följande:
+Ask the coding assistant to define exprToPoly :: Expr -> Poly that converts an expression into a polynomial. 
+
+20.
+
+A6 - converting expressions to polynomials
+okej nästa fråga är följande:
+Ask the coding assistant to define exprToPoly :: Expr -> Poly that converts an expression into a polynomial. 
+
+
+21.
+
+ok next task is this one:
+Continue with the generation of a function going in the other direction, polyToExpr :: Poly -> Expr. Instruct the coding assistant to use “smart constructors” to ensure that you don’t introduce “junk” like multiplication by 1 in your result. We covered such smart constructors in week 6.
+
+Again write (and check) a QuickCheck property prop_polyToExpr by hand for this function similar to that for A6.
+
+22.
+
+and why would it have to be so long just to go in the other direction?
+
+23.
+
+what should 2^100 + 4 be for example? at the moment I get 4?
+
+24.
+
+next task: Let the coding assistant write a function simplify :: Expr -> Expr that simplifies an expression by converting it to a polynomial and back again (this is easy).
+
+25.
+

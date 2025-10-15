@@ -413,7 +413,7 @@ euclid x y | x == y = x
 -- 2 : [3]
 -- [2, 3]
 
-
+{- 
 
 and' :: [Bool] -> Bool
 and' [x]     = x
@@ -464,15 +464,16 @@ type Bit = Int
 bin2int :: [Bit] -> Int
 bin2int bits = sum [w*b | (w,b) <- zip weights bits]
             where weights = iterate (*2) 1
-
+ -}
 
 --exercises
 --[f x | x <- xs, p x]
 --map f (filter p xs)
 
---2.
+{- --2.
 all' :: (a -> Bool) -> [a] -> Bool
 all' p = and . map p
+
 
 any' :: (a -> Bool) -> [a] -> Bool
 any' p = or . map p
@@ -490,4 +491,37 @@ dropWhile' p (x:xs) | p x = dropWhile' p xs
 
 --3.
 -- map f
-mapmo f 
+mapmo f  -}
+
+
+
+sumFoldr :: Num a => [a] -> a 
+sumFoldr xs = foldr (+) 0 xs
+
+productFoldr :: Num a => [a] -> a 
+productFoldr xs = foldr (*) 1 xs
+
+
+productFoldl :: Num a => [a] -> a 
+productFoldl xs = foldl (*) 1 xs
+
+lengthFoldl :: [a] -> Int
+lengthFoldl xs = foldl (\acc _ -> acc + 1) 0 xs
+
+reverseFoldl :: (Show a, Num a) => [a] -> String
+reverseFoldl = foldr (\x acc -> "("++ show x ++ " " ++ acc ++")") "0"
+
+
+
+
+
+latest x = 
+    let n = x^3
+    in (n,n)
+
+
+readAdd :: IO Int
+readAdd = do
+    x <- readLn
+    y <- readLn
+    return (x+y)
