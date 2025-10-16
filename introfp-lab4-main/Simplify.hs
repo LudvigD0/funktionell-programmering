@@ -229,15 +229,30 @@ prop_polyToExpr x p =
 -- * A8
 
 simplify :: Expr -> Expr
-simplify = polyToExpr . exprToPoly
+simplify = polyToExpr . exprToPoly     
 
 --------------------------------------------------------------------------------
 -- * A9
 
+
 prop_noJunk :: Expr -> Bool
-prop_noJunk (Const x)    = 
-prop_noJunk (XPow x)     = 
-prop_noJunk (Bin op x y) = prop_noJunk 
+prop_noJunk = go . simplify  
+  where
+    go (Const _)         = True
+    go (XPow n)          = n /= 0 
+    go (Bin AddOp l r)   =
+      not (isZero l || isZero r || bothConst l r) && go l && go r
+    go (Bin MulOp l r) =
+      not (isZero l || isZero r || isOne l || isOne r || bothConst l r) && go l && go r
+
+    isZero  (Const 0) = True
+    isZero  _ = False
+    isOne   (Const 1) = True  
+    isOne   _ = False
+    isConst (Const _) = True  
+    isConst _ = False
+    bothConst a b = isConst a && isConst b
+
 
 --------------------------------------------------------------------------------
 -- * A10

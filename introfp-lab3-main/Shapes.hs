@@ -83,7 +83,7 @@ allShapes = [Shape (makeSquares s) | s <- shapes]
 -- * Some simple functions
 
 -- ** A1
-emptyShape :: (Int, Int) -> Shape
+emptyShape :: (Int, Int) -> Shape --used for creating the well for the game
 emptyShape (y,x) = Shape (replicate y (replicate x Nothing))
 
 -- ** A2
@@ -106,8 +106,8 @@ shapeSize shape
 blockCount :: Shape -> Int
 blockCount shape = length nonEmptySquares
   where
-    con = concat (rows shape)
-    nonEmptySquares = [t | t <- con, t /= Nothing]
+    con = concat (rows shape)  -- concat example: [[1,2], [3,4]] -> [1,2,3,4]
+    nonEmptySquares = [t | t <- con, t /= Nothing] --how many element that are not "Nothing"
 
 -- * The Shape invariant
 
@@ -120,7 +120,7 @@ prop_Shape :: Shape -> Bool
 prop_Shape shape
   | nrow <= 0 = False --height has to be less or equal to 0
   | cols <= 0 = False --width has to be less or equal to 0
-  | otherwise = and [length r == cols | r <- rows shape] --check that it is rectangular
+  | otherwise = and [length r == cols | r <- rows shape] --check that the rows are the same length
     where
       (nrow, cols) = shapeSize shape 
 
@@ -148,7 +148,8 @@ instance Arbitrary Shape where
 -- | Rotate a shape 90 degrees
 rotateShape :: Shape -> Shape
 rotateShape shape = Shape (reverse (transpose (rows shape)))
-
+--transpose is a function specifically used for these cases where a matrix shall be rotated 
+--(arranging the lists in a smart way), transpose could be defined on our own pretty easy
 --not using reverse will make the test pass but the shape will not be rotated correctly when looking in the terminal
 
 -- ** A8
@@ -158,9 +159,9 @@ shiftShape (y, x) shape = Shape (shiftDown' y (Shape right))
   where
     right = shiftRight' x shape
 
-shiftRight' x shape = [replicate x Nothing ++ t | t <- rows shape]
+shiftRight' x shape = [replicate x Nothing ++ t | t <- rows shape] --helper function
 
-shiftDown' y shape = replicate y (replicate col Nothing) ++ (rows shape)
+shiftDown' y shape = replicate y (replicate col Nothing) ++ (rows shape) --helper function
   where
     (row, col) = shapeSize shape
   
@@ -180,8 +181,8 @@ shiftUp' y shape = (rows shape) ++ replicate y (replicate col Nothing)
 
 -- ** A10
 -- | pad a shape to a given size
-padShapeTo :: (Int, Int) -> Shape -> Shape
-padShapeTo (sizeY, sizeX) shape = padShape (newRowLength, newColLength) shape
+padShapeTo :: (Int, Int) -> Shape -> Shape --add "Nothing" to the right and below to the desired size
+padShapeTo (sizeY, sizeX) shape = padShape (newRowLength, newColLength) shape 
     where
       newRowLength = max 0 (sizeY - row)
       newColLength = max 0 (sizeX - col)
@@ -205,16 +206,18 @@ rowsOverlap sh1Row sh2Row = or [x1 /= Nothing && x2 /= Nothing | (x1, x2) <- zip
 zipShapeWith :: (Square -> Square -> Square) -> Shape -> Shape -> Shape
 zipShapeWith f sh1 sh2 = Shape (zipWith (zipWith f) (rows sh1) (rows sh2))
 
+
 -- ** B3
 -- | Combine two shapes. The two shapes should not overlap.
 -- The resulting shape will be big enough to fit both shapes.
 combine :: Shape -> Shape -> Shape
 s1 `combine` s2 | overlaps s1 s2 = error "Combine: The two shapes are overlapping"
-                | otherwise = (zipShapeWith merge (padShapeTo size s1) (padShapeTo size s2))
+                | otherwise = (zipShapeWith merge (padShapeTo size s1) (padShapeTo size s2)) -- merging 
                   where 
-                    size = (\(a,b) (c,d) -> (max a c, max b d)) (shapeSize s1) (shapeSize s2)
+                    size = (\(a,b) (c,d) -> (max a c, max b d)) (shapeSize s1) (shapeSize s2) 
+                    -- (a,b) represents (Shapesize s1) etc..(since its lambda exp) max is used to get the final biggest shape
                     
-                    merge Nothing Nothing = Nothing
+                    merge Nothing Nothing = Nothing --using patternmatching on the two elements we get when using zipShapeWith
                     merge (Just x) Nothing = Just x 
                     merge Nothing (Just x) = Just x 
                     merge (Just _) (Just _) = Nothing

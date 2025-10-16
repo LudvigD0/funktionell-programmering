@@ -66,7 +66,7 @@ place (v, s) = shiftShape v s
 --B4
 -- | An invariant that startTetris and stepTetris should uphold
 prop_Tetris :: Tetris -> Bool
-prop_Tetris t = prop_Shape s && shapeSize(well t) == wellSize 
+prop_Tetris t = prop_Shape s && shapeSize(well t) == wellSize --prop_Shape checks that rows and columns are not <= 0, and all rows same length
   where 
     (pos, s) = piece t
 
@@ -77,6 +77,7 @@ addWalls :: Shape -> Shape
 addWalls s = Shape (lob: [[Just Black] ++ t ++ [Just Black] | t <- rows s] ++ [lob])
   where
     lob = replicate (snd (shapeSize s) + 2) (Just Black)
+    --we are adding 2 because the top and bottom row has to be 2 cols longer for the well to be complete
 
 
 --B6
@@ -90,10 +91,11 @@ drawTetris (Tetris piece well _) = addWalls (combine (shiftShape pos s) well)
 
 -- | The initial game state
 startTetris :: [Double] -> Tetris
-startTetris rs = Tetris (startPosition, piece) well supply
+startTetris rs = Tetris (startPosition, piece) well supply --supply are all the shapes
  where
-  well         = emptyShape wellSize
+  well         = emptyShape wellSize --creating the well from the wellSize thats defined
   piece:supply = [allShapes !! (min (floor ((fromIntegral (length allShapes)) * x)) 6) | x <- rs]
+  --using 6 because we want to handle the case where x is 1.0
 
 -- | React to input. The function returns 'Nothing' when it's game over,
 -- and @'Just' (n,t)@, when the game continues in a new state @t@.
@@ -104,11 +106,12 @@ stepTetris action t = case action of
   MoveLeft  -> Just (0, (movePiece (-1) t))
   MoveRight -> Just (0, (movePiece 1 t))
   Rotate    -> Just (0, rotatePiece t)
- 
+--actions are the inputs that the game is recieving, either buttons or the Tick that is automatic.
 
 --B7
-move :: (Int, Int) -> Tetris -> Tetris
+move :: (Int, Int) -> Tetris -> Tetris 
 move (y,x) (Tetris ((py,px), s) well shapes) = Tetris ((py+y, px+x), s) well shapes
+--move the shape, we return the new pos of the piece that we can apply later to the shape in piece
 
 
 --B8
@@ -144,7 +147,7 @@ movePiece i t
 
 --C4
 rotate :: Tetris -> Tetris
-rotate t@(Tetris {piece = (pos,s )}) = t{ piece = (pos, rotateShape s)}
+rotate t@(Tetris {piece = (pos,s)}) = t{ piece = (pos, rotateShape s)}
 --using record pattern matching to clarify where pos and s comes from
 --we also return with record syntax for clarity purposes
 
@@ -165,18 +168,18 @@ adjust t@(Tetris ((py,px), s) well shapes)
 --C6
 rotatePiece :: Tetris -> Tetris
 rotatePiece t 
-  | not (collision (rotate t)) =  rotate t
-  | not (collision (adjust $ rotate t)) = adjust $ rotate t --dollar sign instead of paranthases
+  | not (collision (rotate t)) =  rotate t -- just rotate it if there is not a collison
+  | not (collision (adjust $ rotate t)) = adjust $ rotate t --if there is not a collision when we have adjusted it, then return the adjusted rotation
   | otherwise = t --if there a collision, then return just t
 
 --C7
 dropNewPiece :: Tetris -> Maybe (Int, Tetris)
 dropNewPiece (Tetris piece well (shape:shapes)) --instead of using head & tail, we use pattern matching
-  | overlaps (place (startPosition, shape)) s = Nothing
+  | overlaps (place (startPosition, shape)) s = Nothing --if the new piece overlaps when being placed, then end the game
   | otherwise = Just (n, Tetris (startPosition, shape) s shapes)
   where
     (n, s) = clearLines (combine (place piece) well) --using place to update correct position before combining
-
+-- s is the updated well, with all the cleared lines removed
 
 --C8
 --Fixed startTetris
@@ -186,7 +189,7 @@ dropNewPiece (Tetris piece well (shape:shapes)) --instead of using head & tail, 
 clearLines :: Shape -> (Int, Shape)
 clearLines shape = (length newRows, (Shape (newRows ++ newS))) --adding the empty rows before the filtered rows
   where
-    newS = filter (elem Nothing) (rows shape) --using filter to bring along the rows containing "Nothing"
+    newS = filter (elem Nothing) (rows shape) --using filter to only keep the rows containing "Nothing"
     newRows = replicate (length (rows shape) - (length newS)) (replicate col Nothing) --calculates new empty rows, based on the new rows
     (_, col) = shapeSize shape
 
