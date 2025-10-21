@@ -126,3 +126,30 @@ next task: Let the coding assistant write a function simplify :: Expr -> Expr th
 
 25.
 
+next task: We are going to define a function play that lets a user solve polynomial expressions of a particularly difficulty. The difficulty is going to be saved to file, such that a user can resume solving polynomials at the appropriate difficulty. The difficulty is modelled as a natural number and is stored in a file called difficulty.txt. The file should be stored in the same directory as the source files. Let the coding assistant write two IO functions that read respectively write the difficulty: type Difficulty = Int diffFile :: FilePath diffFile = "difficulty.txt" readDifficulty :: IO Difficulty readDifficulty = undefined writeDifficulty :: Difficulty -> IO () writeDifficulty = undefined
+
+26.
+
+Simplify.hs:20:1: error: Could not load module ‘System.Directory’ It is a member of the hidden package ‘directory-1.3.9.0’. You can run ‘:set -package directory’ to expose it. (Note: this unloads all the modules in the current scope.) It is a member of the hidden package ‘directory-1.3.8.5’. You can run ‘:set -package directory’ to expose it. (Note: this unloads all the modules in the current scope.) Use -v (or :set -v in ghci) to see a list of the files searched for. | 20 | import System.Directory (doesFileExist)
+
+27.
+
+btw do you actually need all these packages to make the task I wanted help with?
+
+28.
+
+this is the next task I want you to do, keep it short and simple but still working:A11 - interactive play function Continue with the aid of the coding assistant to define the play :: IO () function that reads the difficulty from file, generates a random expression for that difficulty, generates a random value for x, shows the simplified expression, and ask the user to solve it. If the guess by the user is as expected: give a nice feedback message and increase the difficulty by one, using the appropriate function from A10. If the guess was wrong, again give feedback to the user and decrease the difficulty by one. After having given feed back you should let the user play again. The text below shows an example interaction: ghci> play Simplify the following expression with x = 4 13*x^5+15*x^3+57*x^2+15*x > 132 No, it should have been 15244. Simplify the following expression with x = 4 2*x^3 > 128 Well done! Simplify the following expression with x = 2 x^3+x^2 >
+
+29.
+
+why are you using so many weird imports, can you not do it without them?
+
+30.
+
+A parser is a tool (a function) that converts a string to a value of a particular type. For example, a compiler uses a parser to convert the contents of a source code file (a string), to an abstract syntax tree that is used to generate an executable. Ask the coding assistant to define a parser, which must use the Parser.hs module, for the simple arithmetic expression language you have defined. That is, it should write a function that converts a string, which can contain numbers, additions, and multiplications, to a value of type Expr. The function should have the following type signature:
+
+parseExpr :: String -> Maybe Expr
+
+31.
+
+Simplify.hs:362:3: error: [GHC-39999] • No instance for ‘Monad Parse’ arising from a do statement • In a stmt of a 'do' block: _ <- char 'x' In the expression: do _ <- char 'x' pow <- ((char '^') *> nat) opt 1 pure (XPow pow) In an equation for ‘pX’: pX = do _ <- char 'x' pow <- ((char '^') *> nat) opt 1 pure (XPow pow) | 362 | _ <- char 'x' | ^^^^^^^^^^^^^^^

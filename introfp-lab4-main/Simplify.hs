@@ -6,8 +6,8 @@ License     : BSD
 Maintainer  : alexg@chalmers.se
 Stability   : experimental
 
-Authors     : <list your names here>
-Lab group   : <group number>
+Authors     : <Ludvig Dahlgren, Elliot Frost, Gabbe Hasan>
+Lab group   : <51>
 -}
 
 module Simplify where
@@ -15,6 +15,11 @@ module Simplify where
 import Parser
 import Poly
 import Test.QuickCheck
+
+
+
+
+
 
 -- Use the following simple data type for binary operators
 data BinOp = AddOp | MulOp deriving (Eq)
@@ -257,27 +262,80 @@ prop_noJunk = go . simplify
 --------------------------------------------------------------------------------
 -- * A10
 
+
+
 type Difficulty = Int
 
 diffFile :: FilePath
 diffFile = "difficulty.txt"
 
 readDifficulty :: IO Difficulty
-readDifficulty = undefined
+readDifficulty = do
+  contents <- readFile "difficulty.txt"
+  return (read contents)
+
 
 writeDifficulty :: Difficulty -> IO ()
-writeDifficulty = undefined
+writeDifficulty d = writeFile "difficulty.txt" (show d)    -- write plain number, no newline
+
 
 --------------------------------------------------------------------------------
 -- * A11
 
 play :: IO ()
-play = undefined
+play = do
+  d0 <- readDifficulty
+  loop d0
+  where
+    loop d = do
+      -- generate an expression sized by difficulty + a small x (avoid overflow)
+      e <- generate (resize (max 1 d) (arbitrary :: Gen Expr))
+      x <- generate (chooseInt (1,4))
+      let s       = simplify e
+          correct = eval x s
+
+      putStrLn $ "Simplify the following expression with x = " ++ show x
+      putStrLn ""
+      print s
+      putStr "> "
+      ans <- getLine
+      case (reads ans :: [(Int,String)]) of
+        [(guess,"")] ->
+          if guess == correct
+            then do
+              putStrLn "Well done!"
+              let d' = d + 1
+              writeDifficulty d'
+              loop d'
+            else do
+              putStrLn $ "No, it should have been " ++ show correct ++ "."
+              let d' = max 0 (d - 1)
+              writeDifficulty d'
+              loop d'
+        _ -> do
+          putStrLn "Please enter an integer."
+          loop d
+
 
 --------------------------------------------------------------------------------
 -- * A12
 
 parseExpr :: String -> Maybe Expr
-parseExpr = undefined
+parseExpr = parse (trim pExpr)
+  where
+    pExpr   = chainl pTerm   (op '+' AddOp)
+    pTerm   = chainl pFactor (op '*' MulOp)
+    pFactor = (Const <$> trim int) <|> pXPow <|> parens pExpr
+    pXPow   = trim $ XPow <$> (char 'x' *> ((char '^' *> nat) <|> pure 1))
+    op c o  = Bin o <$ trim (char c)
+
+
+
+prop_showParse_semantic :: Int -> Expr -> Bool
+prop_showParse_semantic x e = go (parseExpr (show e))
+  where
+    go (Just e') = eval x e == eval x e'
+    go Nothing = False
+
 
 --------------------------------------------------------------------------------
