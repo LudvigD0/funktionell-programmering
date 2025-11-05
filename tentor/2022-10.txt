@@ -1,0 +1,163 @@
+
+
+f x (y:z:zs) = y : x : f x (z:zs)
+f _ xs = xs
+
+g x xs = concat (f x xs)
+
+
+g " " ["intro", "func", "prog"]
+--def g
+concat (f " " ["intro", "func", "prog"])
+--first case of def f
+concat ("intro" : " " : f " " ("func" : ["prog"]))
+-- first case of def f
+concat ("intro" : " " : "func" : " " : f " " ("prog" : []))
+--second case of def f
+concat ("intro" : " " : "func" : " " : ["prog"])
+--simplify list
+concat ["intro", " ", "func", " ", "prog"]
+--apply concat
+"intro func prog"
+
+
+f :: [a] -> [[a]] -> [[a]]
+g :: [a] -> [[a]] -> [a]
+
+
+
+
+
+
+gcd' :: Int -> Int -> Int
+gcd' d 0 = d
+gcd' x y = gcd y (x `mod` y)
+
+
+coprime :: Int -> Int -> Bool
+coprime x y = (gcd' x y) == 1
+
+
+
+
+
+
+
+
+
+
+
+data DTree a
+    = Decision a
+    | Question String (DTree a) (DTree a)
+    deriving (Eq, Show)
+
+
+
+
+howMuch = Question "Is the inflation above 2 percent?" (Question "Do you have a mortgage?" (Decision 1000) (Decision 400)) (Decision 100)
+
+
+
+data DTree a
+= Decision a
+| Question String (DTree a) (DTree a)
+deriving (Eq, Show)
+
+
+mapDecision :: (a -> b) -> DTree a -> DTree b
+mapDecision f (Decision a) = (Decision (f a))
+mapDecision f (Question str l r) = (Question str (mapDecision f l) (mapDecision f r))
+
+
+
+
+
+
+takeDecision :: DTree a -> IO a
+takeDecision t = case t of
+    (Decision a)          -> do return a
+    (Question str yes no) -> do
+        putStr (str ++ "yes / no")
+        answer <- getLine
+        if answer == "yes" then takeDecision yes else takeDecision no
+
+
+
+
+
+
+
+
+
+
+
+
+
+type Pixel = (Int, Int)
+
+data BillBoard = BB { size :: (Int, Int), actives :: [Pixel] }
+
+inactives :: Billboard -> Int
+inactives (BB (x,y) ac) = x * y - (length ac)
+
+
+invert :: Billboard -> Billboard
+invert (BB (x,y) ac) = [(x,y) | x <- [0..x], y <- [0..y], not (elem (x,y) ac)  ] 
+
+
+
+
+
+
+
+
+
+
+annasSida :: HTML
+annasSida =
+    [ Text "Welcome to my website!"
+    , Open "P"
+        , Open "B"
+            , Text "My hobbies are ", Open "EM", Text "Haskell", Close "EM"
+            , Text " programming and playing ", Open "EM", Text "Myst", Close "EM"
+            , Text "."
+        , Close "B"
+    , Close "P"
+    , Open "P"
+        , Text "Thanks for visiting! ", Open "EM", Text "anna@gmail.com", Close "EM"
+        , Open "P", Text ". Bye, bye!", Close "P"
+    , Close "P"
+    ]
+
+
+type HTML = [Tag]
+
+
+data Tag
+    = Text String
+    | Open String
+    | Close String
+    deriving (Eq, Show)
+
+
+render :: HTML -> String
+render html = go html
+    where
+        go [] = ""
+        go (x:xs) = case x of
+            (Text a)  -> a ++ go xs
+            (Open a)  -> '<' : a ++ ">" ++ go xs
+            (Close a) -> '<' : '/' : a ++ ">" ++ go xs
+
+
+
+
+checkHtml :: HTML -> Bool
+checkHtml html = go [] html
+    where
+        go xs []     = True
+        go xs (y:ys) = case y of 
+            (Text a)  -> go xs ys
+            (Open a)  -> go (a:xs) ys
+            (Close a) -> if (last xs) == a then go (init xs) ys else False

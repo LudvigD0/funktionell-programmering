@@ -1,0 +1,4 @@
+1 a
+
+fun [] = 0
+fun (x:xs) = if even x then x * fun xs else x + fun xs

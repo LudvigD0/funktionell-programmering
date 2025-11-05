@@ -1,4 +1,4 @@
-
+import Test.QuickCheck
 
 {- 
 
@@ -525,3 +525,79 @@ readAdd = do
     x <- readLn
     y <- readLn
     return (x+y)
+
+
+
+
+
+genBool :: Gen Bool
+genBool = elements [True, False]
+
+
+genInt :: Gen Int
+genInt = choose (1,6)
+
+genPair :: Gen (Int, Int)
+genPair = do
+    first <- elements [1..10]
+    second <- elements [1..10]
+    return (first, second)
+
+
+genLower8 :: Gen String
+genLower8 = do
+    let char = elements ['a'..'z']
+    
+    string <- vectorOf 8 char
+    return string
+
+
+
+genLowerVar :: Gen String
+genLowerVar = do
+    ch <- choose (3,12)
+    str <- vectorOf ch (elements ['a'..'z'])
+    return str
+
+
+
+
+
+data Color = Red | Green | Blue deriving (Show, Eq)
+genColor :: Gen Color
+genColor = elements [Red, Green, Blue]
+
+
+
+
+data Point = Point Int Int deriving Show
+
+
+genPoint :: Gen Point 
+genPoint = do
+    first <- elements [(-10)..10]
+    second <- elements [(-10)..10]
+    return (Point first second)
+
+genPointList :: Int -> Gen [Point]
+genPointList n = vectorOf n genPoint
+
+
+
+
+
+
+
+
+
+data Mark = X | O | B deriving (Show, Enum, Bounded)
+data Board = Board Int [[Mark]] deriving Show
+
+genBoard :: Int -> Gen Board
+genBoard n = do
+    let genList = frequency [(4, pure X), (2, pure O), (1, pure B)]
+
+    rows <- vectorOf n (vectorOf n genList)
+    return (Board n rows)
+    
+

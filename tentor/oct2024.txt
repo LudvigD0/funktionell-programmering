@@ -1,0 +1,222 @@
+
+fun [] = 10
+fun [x] = x
+fun (x:xs) = 1 + fun xs
+
+fun [1,2,3]
+--third case of def fun
+1 + fun [2,3]
+--third case of def fun
+1 + (1 + fun [3])
+--second case of def fun
+1 + (1 + 3)
+--calculate
+5
+
+
+
+fun :: Num a => [a] -> a
+
+
+
+
+
+interLeave :: [a] -> [a] -> [a]
+interLeave [] [] = []
+interLeave [] (y:ys) = y : interLeave [] ys
+interLeave (x:xs) [] = x : interLeave xs []
+interLeave (x:xs) (y:ys) = x : y : interLeave xs ys
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+data GhChat = 
+    {
+        serverAdress :: String
+        , users :: [User]
+        , channels :: [Channel]
+    }
+
+data User = 
+    {
+        name :: String
+        , role :: Role
+    }
+
+data Channel = 
+    {
+        topic :: String
+        , posts :: [(String, User)]
+    }
+
+
+data Role = Administrator | Member | Bot
+
+
+
+
+
+readUser :: IO (String, String)
+readUser = 
+    do
+        putStr "Please give your user name:\n>"
+        userName <- getLine
+        userRole <- getRole userName
+        return (userName, userRole)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+data Some a = One a | Two a a deriving (Eq, Show)
+
+
+flatten :: [Some a] -> [a]
+flatten []     = []
+flatten (x:xs) = convert x
+    where
+        convert (One x)   = x : flatten xs
+        convert (Two x y) = x : y : flatten xs
+
+flatten [One 1, Two 2 3, One 4, Two 5 6]
+convert (One 1) : [Two 2 3, One 4, Two 5 6]
+1 : convert (Two 2 3) : [One 4, Two 5 6]
+1 : 2 : 3 : convert (One 4) : [Two 5 6]
+1 : 2 : 3 : 4 : convert (Two 5 6) : []
+1 : 2 : 3 : 4 : 5 : 6 : []
+[1,2,3,4,5,6]
+        
+
+
+
+
+
+
+
+
+prop_sum :: [Int] -> [Int] -> Bool
+prop_sum xs ys = sum (interLeave xs ys) == sum (xs ++ ys)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+type Name = String
+type Number = Int
+data PhoneBook = Empty | Insert Name Number Phonebook deriving Show
+
+
+
+filterBook :: (Name -> Bool) -> PhoneBook -> PhoneBook
+filterBook _ Empty = Empty
+filterBook p (Insert name number phonebook) = if p name || p number then (Insert name number (filterBook phonebook)) else filterBook phonebook
+
+
+
+
+
+
+
+
+
+
+data Expr
+    = Val Value
+    | Add Expr Expr
+    | Mul Expr Expr
+    | And Expr Expr
+    | Or Expr Expr
+    | If Expr Expr Expr
+    deriving Show
+
+data Value = Num Int | Bool Bool deriving Show
+
+
+int :: Int -> Expr
+int n = Val (Num n)
+
+true, false :: Expr
+true = Val (Bool True)
+false = Val (Bool False)
+
+
+--boolValue :: Value -> Bool
+--numValue :: Num a => Value -> a
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+data Tree a = Leaf a | Node (Tree a) a (Tree a) deriving Show
+type List a = [(Tree a, Int)]
+
+
+
+empty :: List a
+empty = []
+add :: a -> List a -> List a
+x `add` ((l, n) : (r, m) : ts) | n == m = (Node l x r, 2 * n + 1) : ts
+x `add` ts = (Leaf x, 1) : ts
+
+
+
+size :: List a -> Int
+size l = length l

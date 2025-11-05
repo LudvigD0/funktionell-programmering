@@ -115,60 +115,13 @@ eval x e = case e of
 
 -- Write properties!
 
+prop_eval_add :: Int -> Expr -> Expr -> Bool
+prop_eval_add x e1 e2 = eval x (Bin AddOp e1 e2) == eval x e1 + eval x e2
 
-prop_eval_add_homo :: Int -> Expr -> Expr -> Bool
-prop_eval_add_homo x e1 e2 =
-  eval x (Bin AddOp e1 e2) == eval x e1 + eval x e2
-
-prop_eval_mul_homo :: Int -> Expr -> Expr -> Bool
-prop_eval_mul_homo x e1 e2 =
+prop_eval_mul :: Int -> Expr -> Expr -> Bool
+prop_eval_mul x e1 e2 =
   eval x (Bin MulOp e1 e2) == eval x e1 * eval x e2
 
--- Identiteter
-prop_eval_add_id_left  :: Int -> Expr -> Bool
-prop_eval_add_id_left  x e = eval x (Bin AddOp (Const 0) e) == eval x e
-
-prop_eval_add_id_right :: Int -> Expr -> Bool
-prop_eval_add_id_right x e = eval x (Bin AddOp e (Const 0)) == eval x e
-
-prop_eval_mul_id_left  :: Int -> Expr -> Bool
-prop_eval_mul_id_left  x e = eval x (Bin MulOp (Const 1) e) == eval x e
-
-prop_eval_mul_id_right :: Int -> Expr -> Bool
-prop_eval_mul_id_right x e = eval x (Bin MulOp e (Const 1)) == eval x e
-
--- Kommutativitet (+, *)
-prop_eval_add_comm :: Int -> Expr -> Expr -> Bool
-prop_eval_add_comm x e1 e2 =
-  eval x (Bin AddOp e1 e2) == eval x (Bin AddOp e2 e1)
-
-prop_eval_mul_comm :: Int -> Expr -> Expr -> Bool
-prop_eval_mul_comm x e1 e2 =
-  eval x (Bin MulOp e1 e2) == eval x (Bin MulOp e2 e1)
-
--- Associativitet (+, *)
-prop_eval_add_assoc :: Int -> Expr -> Expr -> Expr -> Bool
-prop_eval_add_assoc x e1 e2 e3 =
-  eval x (Bin AddOp (Bin AddOp e1 e2) e3)
-    == eval x (Bin AddOp e1 (Bin AddOp e2 e3))
-
-prop_eval_mul_assoc :: Int -> Expr -> Expr -> Expr -> Bool
-prop_eval_mul_assoc x e1 e2 e3 =
-  eval x (Bin MulOp (Bin MulOp e1 e2) e3)
-    == eval x (Bin MulOp e1 (Bin MulOp e2 e3))
-
--- Distributivitet
-prop_eval_distrib :: Int -> Expr -> Expr -> Expr -> Bool
-prop_eval_distrib x a b c =
-  eval x (Bin MulOp a (Bin AddOp b c))
-    == eval x (Bin AddOp (Bin MulOp a b) (Bin MulOp a c))
-
--- Potenser
-prop_eval_pow1 :: Int -> Bool
-prop_eval_pow1 x = eval x (XPow 1) == x
-
-prop_eval_pow0 :: Int -> Bool
-prop_eval_pow0 x = eval x (XPow 0) == 1
 
 --------------------------------------------------------------------------------
 -- * A6

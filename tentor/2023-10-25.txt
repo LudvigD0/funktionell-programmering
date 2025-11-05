@@ -1,0 +1,244 @@
+
+
+
+
+
+
+
+
+
+
+f [x]    =  x
+f (x:xs) = g x (f xs)
+    where
+        g x y | x >= y    = x
+              | otherwise = y
+
+
+
+
+
+--a
+f [4,7,1]
+
+g 4 (f [7,1])
+
+g 4 (g 7 (f [1]))
+
+g 4 (g 7 1)
+
+g 4 7
+
+7
+
+
+
+
+f :: Ord a => [a] -> a
+
+
+
+
+
+
+
+
+
+remove :: Int -> [Int] -> [Int]
+remove x ys  = filter (\z -> z /= x) ys
+                
+
+remove 1 [1,2,3,1]
+
+
+
+
+removeDups :: [Int] -> [Int]
+removeDups [] = []
+removeDups (x:xs) = x : removeDups (remove x xs) 
+
+
+
+
+
+
+
+data FootballClub = 
+    {
+        name :: String
+        , players :: [Player]
+    }
+
+data Player =
+    {
+        name :: String
+        , fieldPos :: FieldPos
+        , cards :: [Card]
+    }
+
+
+data FieldPos = Defender | Midfielder | Striker
+
+data Card = Yellow | Red
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+helper :: IO String
+helper =
+    do
+        putStr "What is the player's name?:\n>"
+        name <- getLine
+        return name
+
+
+teamSelection :: IO [String]
+teamSelection =
+    do
+        putStr "Welcome coach! How many players do you want to select?\n>"
+        n <- readLn
+        listOfNames <- replicateM n helper
+
+        return listOfNames
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+data Tree = Leaf Int | Node Tree Int Tree deriving (Eq, Show)
+
+
+t :: Tree
+t = Node (Node (Leaf 1) 2 (Leaf 3)) 4 (Leaf 5)
+
+
+
+root :: Tree -> Int
+root (Node l x r) = x
+root (Leaf x)     = x
+
+
+mirror :: Tree -> Tree
+mirror (Leaf x)     = Leaf x
+mirror (Node l x r) = (Node (mirror l) x (mirror r))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+zip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
+zip3 [] _ _ = []
+zip3 _ [] _ = []
+zip3 _ _ [] = []
+zip3 (a:as) (b:bs) (c:cs) = (a, b, c) : zip3 as bs cs
+
+zip3 [1,2,3] [4,5,6] [7,8]
+(1,4,7) : zip3 [2,3] [5,6] [8]
+(1,4,7) : (2,5,8) : zip3 [3] [6] []
+(1,4,7) : (2,5,8) : []
+
+
+
+
+
+
+zipMaybe :: (a -> b -> Maybe c) -> [a] -> [b] -> [c]
+zipMaybe f (x:xs) (y:ys) = case (f x y) of
+        Just x    -> x : zipMaybe f xs ys
+        Nothing -> zipMaybe f xs ys
+zipMaybe _ _ _ = []
+    
+
+
+
+
+
+
+
+
+
+
+
+
+data Board a = Board { size :: Int, rows :: [[a]] }
+
+data Mark = X | O | B deriving Show
+
+example :: Board Mark
+example = Board 3 [ [ O, X, B ]
+                  , [ X, O, B ]
+                  , [ X, B, O ] ]
+
+
+
+--[O, 0, X, 0, B]
+
+
+
+instance Show a => Show (Board a) where
+    show :: Board a -> String                                   
+    show (Board size (x:xs)) = unlines (intersperse (replicate size "-") (go size (x:xs)))
+        where
+            
+            go :: [[Mark]] -> 
+            go n [] = []
+            --"0|X|B" : "0|X|B" : []
+
+            go n (y:ys) = (intersperse "|" (row y)) : go ys
+                where
+                    row :: [Mark] -> String 
+                    row [] = ""
+                    row (z:zs) = show z ++ row zs
+
+
+
+--intersperse :: a -> [a] -> [a]
+-- intersperse 0 [1,2,3,4] == [1,0,2,0,3,0,4]
+
+
+--unlines :: [String] -> String
+-- unlines ["ap","bep","cep"] == "ap\nbep\ncep"
+
+
+
+
+
+
+
